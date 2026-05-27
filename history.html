@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History | DADAXWEAR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff6b00;
+            --bg: #0a0a0a;
+            --card: #161616;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --border: rgba(255,255,255,0.1);
+            --danger: #ff4d4d;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:80px; }
+
+        header {
+            background:rgba(10,10,10,0.95);
+            padding:18px 20px;
+            display:flex; align-items:center; gap:15px;
+            position:sticky; top:0; z-index:100;
+            border-bottom:1px solid var(--border);
+            backdrop-filter:blur(10px);
+        }
+        .back-btn {
+            color:var(--text); text-decoration:none;
+            width:40px; height:40px; border-radius:50%;
+            background:var(--card);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .header-title { flex:1; font-size:1.15rem; font-weight:700; }
+
+        /* Clear All Button — header-এ */
+        #clear-all-btn {
+            background: rgba(255,77,77,0.12);
+            color: var(--danger);
+            border: 1px solid rgba(255,77,77,0.3);
+            border-radius:10px;
+            padding: 7px 13px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none; /* orders লোড হলে দেখাবে */
+            gap: 5px;
+            align-items: center;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        #clear-all-btn:active { background: rgba(255,77,77,0.25); }
+
+        .container { max-width:600px; margin:20px auto; padding:0 15px; }
+
+        /* Spinner */
+        #loading-view { text-align:center; padding:80px 20px; }
+        .spinner {
+            width:36px; height:36px;
+            border:3px solid rgba(255,107,0,0.2);
+            border-top-color:var(--primary);
+            border-radius:50%;
+            animation:spin 0.75s linear infinite;
+            margin:0 auto 16px;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        #loading-view p { color:var(--text-dim); font-size:0.82rem; letter-spacing:1px; text-transform:uppercase; }
+
+        /* Empty */
+        #empty-view { text-align:center; padding:90px 20px; display:none; }
+        #empty-view i { font-size:4rem; color:rgba(255,255,255,0.08); margin-bottom:20px; display:block; }
+        #empty-view h3 { font-size:1.2rem; margin-bottom:8px; }
+        #empty-view p  { color:var(--text-dim); font-size:0.9rem; }
+        .go-shop {
+            display:inline-block; background:var(--primary); color:#fff;
+            padding:13px 32px; border-radius:30px; text-decoration:none;
+            margin-top:22px; font-weight:700; font-size:0.9rem;
+        }
+
+        /* Order Card */
+        .order-card {
+            background:var(--card);
+            border-radius:16px; padding:20px;
+            margin-bottom:18px;
+            border:1px solid var(--border);
+            box-shadow:0 8px 28px rgba(0,0,0,0.3);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .order-card.removing {
+            opacity: 0;
+            transform: scale(0.96);
+        }
+
+        .order-header {
+            display:flex; justify-content:space-between; align-items:flex-start;
+            padding-bottom:14px; margin-bottom:14px;
+            border-bottom:1px solid var(--border);
+            gap:8px;
+        }
+        .order-header-left { flex:1; min-width:0; }
+        .order-id   { color:var(--primary); font-weight:700; font-size:0.92rem; }
+        .order-date { color:var(--text-dim); font-size:0.78rem; margin-top:4px; }
+
+        .order-header-right {
+            display:flex; align-items:center; gap:8px; flex-shrink:0;
+        }
+        .order-status {
+            padding:4px 12px; border-radius:20px;
+            font-size:0.72rem; font-weight:700;
+        }
+        .status-pending   { background:rgba(255,193,7,0.15);  color:#ffc107; }
+        .status-confirmed { background:rgba(13,202,240,0.15); color:#0dcaf0; }
+        .status-shipped   { background:rgba(13,110,253,0.15); color:#6ea8fe; }
+        .status-delivered { background:rgba(25,135,84,0.15);  color:#75b798; }
+        .status-cancelled { background:rgba(220,53,69,0.15);  color:#ea868f; }
+        .status-default   { background:rgba(255,107,0,0.12);  color:var(--primary); }
+
+        /* Delete single order button */
+        .delete-order-btn {
+            background: none;
+            border: none;
+            color: rgba(255,77,77,0.5);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: color 0.2s, background 0.2s;
+            flex-shrink: 0;
+        }
+        .delete-order-btn:active {
+            color: var(--danger);
+            background: rgba(255,77,77,0.1);
+        }
+
+        /* Product items */
+        .product-item {
+            display:flex; align-items:center; gap:12px;
+            padding:10px 0;
+            border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+        .product-item:last-child { border-bottom:none; }
+
+        .prod-thumb {
+            width:46px; height:46px;
+            border-radius:10px;
+            object-fit:cover;
+            background:#1e1e1e;
+            flex-shrink:0;
+            border:1px solid rgba(255,255,255,0.08);
+        }
+        .prod-thumb-placeholder {
+            width:46px; height:46px;
+            border-radius:10px;
+            background:#1e1e1e;
+            flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            border:1px solid rgba(255,255,255,0.08);
+            color:rgba(255,255,255,0.15);
+            font-size:1.1rem;
+        }
+
+        .prod-info { flex:1; min-width:0; }
+        .prod-info h4  { font-size:0.9rem; margin-bottom:4px;
+                         white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .prod-meta     { font-size:0.75rem; color:var(--text-dim); }
+        .prod-price    { font-weight:700; color:var(--primary); font-size:0.88rem;
+                         white-space:nowrap; margin-left:4px; flex-shrink:0; }
+
+        .order-summary {
+            margin-top:14px; padding-top:14px;
+            border-top:1px solid var(--border);
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .total-text { font-size:0.82rem; color:var(--text-dim); }
+        .total-val  { font-size:1.1rem; font-weight:800; }
+
+        /* Toast */
+        #toast {
+            position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+            background:#fff; color:#000;
+            padding:10px 22px; border-radius:50px;
+            font-size:0.82rem; font-weight:700;
+            box-shadow:0 4px 20px rgba(0,0,0,0.4);
+            z-index:9999; opacity:0; pointer-events:none;
+            transition: opacity 0.3s;
+            white-space:nowrap;
+        }
+        #toast.show { opacity:1; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <span class="header-title">Order History</span>
+    <button id="clear-all-btn" onclick="clearAllOrders()">
+        <i class="fas fa-trash-alt"></i> Clear All
+    </button>
+</header>
+
+<div class="container">
+    <div id="loading-view">
+        <div class="spinner"></div>
+        <p>Loading Orders...</p>
+    </div>
+    <div id="empty-view">
+        <i class="fas fa-box-open"></i>
+        <h3>No Orders Yet</h3>
+        <p>Once you place an order, it will appear here.</p>
+        <a href="index.html" class="go-shop">START SHOPPING</a>
+    </div>
+    <div id="history-list"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const BASE_URL = 'https://dadaxwear.com';
+
+// ─── in-memory merged list (delete এর জন্য দরকার) ───
+let mergedOrders = [];
+
+function getImgUrl(img) {
+    if (!img) return '';
+    if (img.startsWith('http')) return img;
+    return BASE_URL + (img.startsWith('/') ? img : '/' + img);
+}
+
+function safeRead(key) {
+    try {
+        const v = localStorage.getItem(key);
+        if (!v) return [];
+        const p = JSON.parse(v);
+        return Array.isArray(p) ? p : [];
+    } catch (e) { return []; }
+}
+
+function fetchWithTimeout(url, ms) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Timeout')), ms);
+        fetch(url)
+            .then(r => { clearTimeout(timer); resolve(r); })
+            .catch(e => { clearTimeout(timer); reject(e); });
+    });
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.addEventListener('DOMContentLoaded', loadHistory);
+
+async function loadHistory() {
+    const listEl    = document.getElementById('history-list');
+    const emptyEl   = document.getElementById('empty-view');
+    const loadingEl = document.getElementById('loading-view');
+    const clearBtn  = document.getElementById('clear-all-btn');
+
+    const localOrders = safeRead('dxw_order_history');
+
+    let serverOrders = [];
+    const phone = (
+        localStorage.getItem('dxw_user_phone') ||
+        localStorage.getItem('userPhone') ||
+        localStorage.getItem('dxw_phone') ||
+        localStorage.getItem('phone') || ''
+    ).trim();
+
+    if (phone) {
+        try {
+            const res = await fetchWithTimeout(
+                `${BASE_URL}/api/orders/user/${encodeURIComponent(phone)}`, 8000
+            );
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    serverOrders = data.map(normalizeServerOrder);
+                }
+            }
+        } catch (e) {
+            console.warn('API failed, using localStorage:', e.message);
+        }
+    }
+
+    mergedOrders = [...serverOrders];
+    const srvIds = new Set(serverOrders.map(o => o.orderId).filter(Boolean));
+    for (const lo of localOrders) {
+        if (lo.orderId && srvIds.has(lo.orderId)) continue;
+        mergedOrders.push(normalizeLocalOrder(lo));
+    }
+
+    loadingEl.style.display = 'none';
+
+    if (mergedOrders.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+    }
+
+    clearBtn.style.display = 'flex';
+    renderList();
+}
+
+function renderList() {
+    const listEl   = document.getElementById('history-list');
+    const emptyEl  = document.getElementById('empty-view');
+    const clearBtn = document.getElementById('clear-all-btn');
+
+    if (mergedOrders.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        clearBtn.style.display = 'none';
+        return;
+    }
+
+    listEl.innerHTML = mergedOrders.map((order, idx) => renderCard(order, idx)).join('');
+}
+
+// ─── Single order delete ───
+window.deleteOrder = async function(idx) {
+    const order = mergedOrders[idx];
+    if (!order) return;
+
+    if (!confirm(`#${order.orderId} অর্ডারটি মুছবেন?`)) return;
+
+    const cardEl = document.querySelector(`[data-idx="${idx}"]`);
+    if (cardEl) {
+        cardEl.classList.add('removing');
+        await new Promise(r => setTimeout(r, 280));
+    }
+
+    // localStorage থেকে সরাও
+    try {
+        let local = safeRead('dxw_order_history');
+        local = local.filter(o => o.orderId !== order.orderId);
+        localStorage.setItem('dxw_order_history', JSON.stringify(local));
+    } catch (e) {}
+
+    // Server DB থেকেও সরাও (যদি _id থাকে)
+    if (order._id) {
+        try {
+            await fetch(`${BASE_URL}/api/orders/${order._id}`, { method: 'DELETE' });
+        } catch (e) {
+            console.warn('Server delete failed:', e.message);
+        }
+    }
+
+    // Memory থেকে সরাও এবং re-render
+    mergedOrders.splice(idx, 1);
+    renderList();
+    showToast('🗑️ অর্ডার মুছে গেছে');
+};
+
+// ─── Clear All ───
+window.clearAllOrders = function() {
+    if (mergedOrders.length === 0) return;
+    if (!confirm('সব অর্ডার মুছবেন?')) return;
+
+    // localStorage পুরোটা clear
+    localStorage.removeItem('dxw_order_history');
+
+    // Server থেকে delete (যেগুলোতে _id আছে)
+    mergedOrders.forEach(order => {
+        if (order._id) {
+            fetch(`${BASE_URL}/api/orders/${order._id}`, { method: 'DELETE' })
+                .catch(e => console.warn('Server delete failed:', e.message));
+        }
+    });
+
+    mergedOrders = [];
+    renderList();
+    showToast('🗑️ সব অর্ডার মুছে গেছে');
+};
+
+// ─── Normalize functions ───
+function normalizeServerOrder(o) {
+    return {
+        _id:     String(o._id || ''),   // delete API-র জন্য রাখা
+        orderId: o.orderId || String(o._id || '').slice(-8).toUpperCase(),
+        date:    o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-GB') : (o.date || '—'),
+        total:   Number(o.totalAmount ?? o.total ?? 0),
+        status:  o.status || 'Pending',
+        items:   (o.items || []).map(normalizeItem),
+        isLocal: false
+    };
+}
+
+function normalizeLocalOrder(o) {
+    return {
+        _id:     '',
+        orderId: o.orderId || '—',
+        date:    o.date    || '—',
+        total:   Number(o.totalAmount ?? o.total ?? 0),
+        status:  o.status  || 'Pending',
+        items:   (o.items || []).map(normalizeItem),
+        isLocal: true
+    };
+}
+
+function normalizeItem(item) {
+    return {
+        name:     String(item.name     || 'Product'),
+        price:    Number(item.price)    || 0,
+        quantity: Number(item.quantity) || 1,
+        size:     String(item.size     || ''),
+        sleeve:   String(item.handType || item.sleeve || ''),
+        image:    item.image || ''
+    };
+}
+
+function statusClass(s) {
+    switch ((s || '').toLowerCase()) {
+        case 'pending':   return 'status-pending';
+        case 'confirmed': return 'status-confirmed';
+        case 'shipped':   return 'status-shipped';
+        case 'delivered': return 'status-delivered';
+        case 'cancelled': return 'status-cancelled';
+        default:          return 'status-default';
+    }
+}
+
+function renderCard(order, idx) {
+    const itemsHTML = (order.items || []).map(item => {
+        const meta = [`Qty: ${item.quantity}`];
+        if (item.size   && item.size   !== 'N/A' && item.size   !== '—') meta.push(`Size: ${item.size}`);
+        if (item.sleeve && item.sleeve !== 'N/A' && item.sleeve !== '—') meta.push(`Sleeve: ${item.sleeve}`);
+
+        const imgUrl    = getImgUrl(item.image);
+        const thumbHtml = imgUrl
+            ? `<img class="prod-thumb" src="${imgUrl}" loading="lazy" onerror="this.style.visibility='hidden'">`
+            : `<div class="prod-thumb-placeholder"><i class="fas fa-box"></i></div>`;
+
+        return `
+        <div class="product-item">
+            ${thumbHtml}
+            <div class="prod-info">
+                <h4>${item.name}</h4>
+                <div class="prod-meta">${meta.join(' &nbsp;|&nbsp; ')}</div>
+            </div>
+            <div class="prod-price">${(item.price * item.quantity).toLocaleString()} TK</div>
+        </div>`;
+    }).join('');
+
+    return `
+    <div class="order-card" data-idx="${idx}">
+        <div class="order-header">
+            <div class="order-header-left">
+                <div class="order-id">#${order.orderId}</div>
+                <div class="order-date">
+                    <i class="fas fa-calendar-alt" style="margin-right:5px;opacity:0.6;"></i>${order.date}
+                </div>
+            </div>
+            <div class="order-header-right">
+                <span class="order-status ${statusClass(order.status)}">${order.status}</span>
+                <button class="delete-order-btn" onclick="deleteOrder(${idx})" title="Delete order">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="product-list">
+            ${itemsHTML || '<p style="color:#666;font-size:0.85rem;padding:8px 0;">আইটেম পাওয়া যাচ্ছে না</p>'}
+        </div>
+        <div class="order-summary">
+            <span class="total-text">মোট পরিশোধযোগ্য</span>
+            <span class="total-val">${Number(order.total).toLocaleString()} TK</span>
+        </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

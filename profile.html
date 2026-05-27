@@ -7,6 +7,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
+    <style>
+        .history-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 107, 0, 0.12);
+            color: #ff6b00;
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            border-radius: 20px;
+            padding: 7px 15px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.3px;
+            transition: background 0.2s;
+        }
+        .history-action-btn:active { background: rgba(255, 107, 0, 0.25); }
+	.game-btn{
+ 	   display:inline-flex;
+   	 align-items:center;
+    gap:10px;
+    padding:12px 20px;
+    font-size:15px;
+    font-weight:600;
+    color:#fff;
+    text-decoration:none;
+
+    background:linear-gradient(135deg,#00c853,#00e676);
+    border-radius:10px;
+
+    transition:0.3s;
+    box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+
+.game-btn i{
+    font-size:16px;
+}
+
+.game-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(0,200,83,0.5);
+}   
+    </style>
 </head>
 <body class="dark-theme">
 
@@ -14,6 +57,9 @@
         <!-- Top Action Bar -->
         <div class="profile-top-bar">
             <a href="help.html" class="help-action-btn">Help Me</a>
+            <a href="history.html" class="history-action-btn">
+                <i class="fas fa-box"></i> My Orders
+            </a>
             <a href="setting.html" class="settings-action-btn">
                 <i class="fas fa-cog"></i>
             </a>
@@ -60,6 +106,8 @@
             <button class="sign-out-btn" id="signOutBtn">
                 <i class="fas fa-sign-out-alt"></i> SIGN OUT
             </button>
+	    <a href="game.html" class="game-btn">
+   	    <i class="fas fa-gamepad"></i> Play Game</a>
         </div>
     </div>
 
@@ -70,14 +118,14 @@
         <a href="profile.html" class="active"><i class="fas fa-user"></i></a>
     </nav>
 
-    <!-- Internal Script (Replacing profile.js) -->
+    <!-- Internal Script -->
     <script>
         const API_BASE = 'https://dadaxwear.com/api';
+        const SITE_DOMAIN = 'https://dadaxwear.com';
 
         document.addEventListener('DOMContentLoaded', async () => {
             const userPhone = localStorage.getItem('user_phone');
 
-            // যদি ফোন নম্বর না থাকে, তবে তাকে লগইন/সেটআপ পেজে পাঠাও
             if (!userPhone) {
                 window.location.href = 'login.html';
                 return;
@@ -101,6 +149,7 @@
             document.getElementById('signOutBtn').onclick = () => {
                 localStorage.removeItem('user_phone');
                 localStorage.removeItem('dxw_user');
+                localStorage.removeItem('user_img'); // ইমেজও রিমুভ হবে
                 window.location.href = 'login.html';
             };
 
@@ -120,8 +169,15 @@
             document.getElementById('display-address').innerText = user.address || '-';
 
             if (user.profileImage) {
-                const imgUrl = user.profileImage.startsWith('http') ? user.profileImage : `http://156.67.219.98:5001${user.profileImage}`;
+                // ইমেজ URL তৈরি (IP সরিয়ে ডোমেইন ব্যবহার)
+                const imgUrl = user.profileImage.startsWith('http') 
+                    ? user.profileImage 
+                    : `${SITE_DOMAIN}${user.profileImage}`;
+                
                 document.getElementById('display-img').src = imgUrl;
+
+                // গুরুত্বপূর্ণ: মেইন পেজে দেখানোর জন্য ইমেজ URL লোকাল স্টোরেজে রাখা
+                localStorage.setItem('user_img', imgUrl);
             }
         }
     </script>

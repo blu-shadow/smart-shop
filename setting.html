@@ -8,23 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <link rel="stylesheet" href="style.css"> 
     <style>
         :root {
             --bg: #0d0f12;
             --card: #161a1e;
-            --primary: #ff4d00; /* Dark Mode Red */
+            --primary: #ff4d00; 
             --text: #ffffff;
             --text-gray: #8e9aaf;
             --border: rgba(255, 255, 255, 0.08);
             --header-bg: #1a1d21;
         }
 
-        /* 🌈 PREMIUM LIGHT THEME (Sky Blue Scheme) */
         body.light-theme {
-            --bg: #f0f3f7; /* Soft Blue-Gray background */
+            --bg: #f0f3f7; 
             --card: #ffffff;
-            --primary: #0084ff; /* Cool Sky Blue */
+            --primary: #0084ff; 
             --text: #1a202c;
             --text-gray: #4a5568;
             --border: rgba(0, 0, 0, 0.06);
@@ -35,7 +33,6 @@
         .settings-body { padding-bottom: 100px; }
         .settings-section { padding: 20px 5%; max-width: 600px; margin: 0 auto; }
         
-        /* Header Fix */
         .top-header { background: var(--header-bg); border-bottom: 1px solid var(--border); padding: 15px 5%; position: sticky; top: 0; z-index: 100; }
         .brand { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
@@ -49,6 +46,7 @@
             border: 1px solid var(--border);
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
         .setting-row {
             display: flex;
@@ -57,15 +55,35 @@
             padding: 20px;
             border-bottom: 1px solid var(--border);
             transition: 0.2s;
+            cursor: pointer;
         }
-        .setting-row:active { background: rgba(0,0,0,0.03); }
+        .setting-row:active { background: rgba(0,0,0,0.1); }
         .setting-row:last-child { border-bottom: none; }
         
         .row-info { display: flex; align-items: center; gap: 15px; }
         .row-info i { color: var(--primary); font-size: 1.2rem; width: 24px; text-align: center; }
         .row-info span { font-weight: 600; font-size: 0.95rem; }
 
-        /* Modern Toggle Switch */
+        /* Modal Styles */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 4000; display: none; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 28px; padding: 25px; max-width: 500px; width: 100%;
+            max-height: 70vh; overflow-y: auto; color: var(--text);
+            animation: modalSlide 0.3s ease-out;
+        }
+        @keyframes modalSlide { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: sticky; top: 0; background: var(--card); z-index: 2; }
+        .modal-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary); }
+        .close-btn { background: none; border: none; color: var(--text-gray); font-size: 1.5rem; cursor: pointer; }
+        .modal-text { font-size: 0.9rem; color: var(--text-gray); line-height: 1.6; }
+
+        /* Switch Styling */
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -86,50 +104,17 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Modal / Popup Styling */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-            z-index: 3000; display: none; align-items: center; justify-content: center;
-            padding: 20px; animation: fadeIn 0.3s;
+        #dxw_toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: var(--card); padding: 12px 25px;
+            border-radius: 50px; font-weight: 700; z-index: 5000; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-size: 0.85rem;
         }
-        .modal-content {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 30px; padding: 30px; max-width: 450px; width: 100%;
-            max-height: 80vh; overflow-y: auto; position: relative;
-            transform: translateY(20px); animation: slideUp 0.3s forwards;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { to { transform: translateY(0); } }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { font-size: 1.3rem; color: var(--primary); margin: 0; font-weight: 800; }
-        .close-modal { font-size: 1.4rem; color: var(--text-gray); cursor: pointer; }
-        .modal-body p { font-size: 0.92rem; color: var(--text-gray); line-height: 1.7; margin-bottom: 15px; }
 
         .app-version { text-align: center; color: var(--text-gray); font-size: 0.8rem; margin-top: 40px; font-weight: 500; }
-
-        /* Bottom Nav Fix */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: var(--card); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; padding: 12px 0; z-index: 100;
-        }
-        .nav-link { text-decoration: none; color: var(--text-gray); display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-link.active { color: var(--primary); }
-        .nav-link i { font-size: 1.3rem; }
-        .nav-link span { font-size: 0.7rem; font-weight: 600; }
     </style>
 </head>
 <body class="dark-theme settings-body">
-
-    <!-- Global Theme Engine -->
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('dxw_theme');
-            if(savedTheme === 'light') { document.body.classList.add('light-theme'); document.body.classList.remove('dark-theme'); }
-        })();
-    </script>
 
     <header class="top-header">
         <div class="brand" onclick="location.href='profile.html'">
@@ -141,7 +126,7 @@
     <main class="settings-section">
         <div class="section-label">Preference</div>
         <div class="setting-card">
-            <div class="setting-row">
+            <div class="setting-row" style="cursor: default;">
                 <div class="row-info">
                     <i class="fas fa-adjust"></i>
                     <span>Dark Mode</span>
@@ -152,7 +137,7 @@
                 </label>
             </div>
 
-            <div class="setting-row">
+            <div class="setting-row" style="cursor: default;">
                 <div class="row-info">
                     <i class="fas fa-bell"></i>
                     <span>Push Notifications</span>
@@ -166,14 +151,14 @@
 
         <div class="section-label">Legal & Info</div>
         <div class="setting-card">
-            <div class="setting-row" onclick="openModal('about-modal')">
+            <div class="setting-row" onclick="openModal('aboutModal')">
                 <div class="row-info">
                     <i class="fas fa-crown"></i>
                     <span>About DadaXWear</span>
                 </div>
                 <i class="fas fa-chevron-right" style="font-size: 0.8rem; opacity: 0.4;"></i>
             </div>
-            <div class="setting-row" onclick="openModal('privacy-modal')">
+            <div class="setting-row" onclick="openModal('privacyModal')">
                 <div class="row-info">
                     <i class="fas fa-shield-alt"></i>
                     <span>Privacy Policy</span>
@@ -188,49 +173,59 @@
         </div>
     </main>
 
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-link">
-            <i class="fas fa-th-large"></i>
-            <span>Home</span>
-        </a>
-        <a href="profile.html" class="nav-link active">
-            <i class="fas fa-user"></i>
-            <span>Account</span>
-        </a>
-    </nav>
-
-    <!-- MODALS -->
-    <div id="about-modal" class="modal" onclick="if(event.target==this) closeModal('about-modal')">
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal" onclick="closeModalOnSide(event, 'aboutModal')">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>About DadaXWear</h2>
-                <i class="fas fa-times close-modal" onclick="closeModal('about-modal')"></i>
+                <button class="close-btn" onclick="closeModal('aboutModal')">&times;</button>
             </div>
-            <div class="modal-body">
-                <p><b>DadaXWear</b> is more than just a brand; it's a choice for those who seek premium authentic quality.</p>
-                <p>We provide exclusive access to high-end Esports jerseys and football kits that are often hard to find elsewhere in Bangladesh.</p>
-                <p>Our commitment is simple: if it's not the best, it's not from DadaXWear.</p>
+            <div class="modal-text">
+                DadaXWear হলো একটি প্রিমিয়াম ফ্যাশন ই-কমার্স প্ল্যাটফর্ম। আমাদের মূল লক্ষ্য হলো উন্নত মানের এবং স্টাইলিশ পোশাক সাশ্রয়ী মূল্যে গ্রাহকদের কাছে পৌঁছে দেওয়া। আমরা আধুনিক ডিজাইন এবং টেকসই ফেব্রিকের সমন্বয়ে পোশাক তৈরি করি যা আপনার ব্যক্তিত্বকে ফুটিয়ে তোলে। 
+                <br><br>
+                <b>Vision:</b> বাংলাদেশের ফ্যাশন ইন্ডাস্ট্রিতে একটি আস্থার নাম হয়ে ওঠা।
+                <br>
+                <b>Quality:</b> আমরা প্রতিটি সুতার মান যাচাই করি যাতে আপনি পান সেরা অভিজ্ঞতা।
             </div>
         </div>
     </div>
 
-    <div id="privacy-modal" class="modal" onclick="if(event.target==this) closeModal('privacy-modal')">
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="modal" onclick="closeModalOnSide(event, 'privacyModal')">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Privacy Policy</h2>
-                <i class="fas fa-times close-modal" onclick="closeModal('privacy-modal')"></i>
+                <button class="close-btn" onclick="closeModal('privacyModal')">&times;</button>
             </div>
-            <div class="modal-body">
-                <p>We value your trust above all else. Your personal details like name, phone, and address are only used for delivery purposes.</p>
-                <p>Your order history is kept private to personalize your future shopping experience. We never sell or share your data.</p>
-                <p>Safe shopping is our priority.</p>
+            <div class="modal-text">
+                DadaXWear-এ আপনার ব্যক্তিগত তথ্যের সুরক্ষা আমাদের কাছে অত্যন্ত গুরুত্বপূর্ণ। 
+                <br><br>
+                ১. <b>তথ্য সংগ্রহ:</b> আমরা আপনার নাম, ফোন নম্বর এবং ঠিকানা সংগ্রহ করি শুধুমাত্র অর্ডার ডেলিভারি নিশ্চিত করার জন্য।
+                <br>
+                ২. <b>নিরাপত্তা:</b> আপনার কোনো তথ্য তৃতীয় পক্ষের কাছে বিক্রয় বা হস্তান্তর করা হয় না। 
+                <br>
+                ৩. <b>পেমেন্ট:</b> আমাদের অনলাইন পেমেন্ট সিস্টেম সম্পূর্ণ এনক্রিপ্টেড এবং নিরাপদ। 
+                <br><br>
+                আপনার ব্রাউজিং অভিজ্ঞতা উন্নত করার জন্য আমরা কুকিজ ব্যবহার করতে পারি। আরও বিস্তারিত জানতে আমাদের সাপোর্ট টিমে যোগাযোগ করুন।
             </div>
         </div>
     </div>
 
-    <div id="dxw_toast" style="position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--text); color:var(--card); padding:12px 25px; border-radius:50px; font-weight:700; z-index:5000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.2); font-size:0.85rem;"></div>
+    <div id="dxw_toast"></div>
 
     <script>
+        // Modal Controls
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        function closeModalOnSide(e, id) {
+            if(e.target.id === id) closeModal(id);
+        }
+
+        // Theme Engine
         function toggleTheme() {
             const isChecked = document.getElementById('theme-toggle').checked;
             if(isChecked) {
@@ -246,11 +241,9 @@
 
         function toggleNotif() {
             const isChecked = document.getElementById('notif-toggle').checked;
+            localStorage.setItem('notifications_enabled', isChecked);
             showToast(isChecked ? "✅ Notifications Enabled" : "🔕 Notifications Muted");
         }
-
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         function showToast(msg) {
             const t = document.getElementById('dxw_toast');
@@ -260,7 +253,8 @@
         }
 
         window.addEventListener('load', () => {
-            const savedTheme = localStorage.getItem('dxw_theme');
+            // ── Theme restore ──
+            const savedTheme = localStorage.getItem('dxw_theme') || 'dark';
             const themeToggle = document.getElementById('theme-toggle');
             if(savedTheme === 'light') {
                 themeToggle.checked = false;
@@ -269,6 +263,13 @@
                 themeToggle.checked = true;
                 document.body.classList.add('dark-theme');
             }
+
+            // ✅ FIX: Notification toggle restore
+            // আগে এই code ছিল না — তাই page load হলে toggle সবসময় off থাকত
+            const notifSaved  = localStorage.getItem('notifications_enabled');
+            const notifToggle = document.getElementById('notif-toggle');
+            // কখনো set না হলে default: ON (true)
+            notifToggle.checked = notifSaved !== 'false';
         });
     </script>
 </body>

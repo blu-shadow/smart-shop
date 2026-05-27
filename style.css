@@ -1,6 +1,6 @@
 /* ======================================================
-   DADAXWEAR LUXURY EDITION - v12.0 (ULTRA-PREMIUM)
-   Focus: Fixed Checkout, Glassmorphism, Stylish Add Icon
+   DADAXWEAR LUXURY EDITION - v13.0
+   Update: Adjusted Checkout Button Position & Layout
 ====================================================== 
 */
 
@@ -58,13 +58,21 @@ body {
 .logo-text span { color: var(--primary); }
 
 .header-actions { display: flex; align-items: center; }
-.admin-badge {
+
+/* Notification Button Style */
+.notification-btn {
     background: rgba(255, 107, 0, 0.1); color: var(--primary);
     width: 38px; height: 38px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     margin-right: 12px; text-decoration: none; border: 1px solid rgba(255, 107, 0, 0.2);
+    position: relative;
 }
-.user-trigger { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary); padding: 2px; }
+
+.user-trigger { 
+    width: 38px; height: 38px; border-radius: 50%; 
+    border: 2px solid var(--primary); padding: 2px; 
+    overflow: hidden;
+}
 #user-logo-display { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
 /* --- Category Pills --- */
@@ -84,7 +92,7 @@ body {
 .section-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; }
 .badge-count { background: #1a1d21; padding: 3px 12px; border-radius: 50px; font-size: 0.75rem; color: var(--primary); font-weight: 700; border: 1px solid var(--border-color); }
 
-/* --- [PREMIUM REBUILD] Product Card --- */
+/* --- Product Card --- */
 .product-grid {
     display: grid; 
     grid-template-columns: repeat(2, 1fr);
@@ -134,7 +142,6 @@ body {
 .card-bottom { display: flex; justify-content: space-between; align-items: center; }
 .product-price { font-size: 1.1rem; font-weight: 800; color: var(--primary); letter-spacing: -0.3px; }
 
-/* Stylish Add Button (Floating Style) */
 .add-btn-small {
     background: linear-gradient(135deg, var(--primary), #ff8c33);
     color: #fff; 
@@ -147,9 +154,7 @@ body {
     transition: 0.3s ease;
 }
 
-.add-btn-small:active { transform: scale(0.85) rotate(90deg); }
-
-/* --- [FIXED] Cart Drawer --- */
+/* --- Cart Drawer --- */
 .cart-drawer {
     position: fixed; top: 0; right: -100%; width: 100%; max-width: 420px;
     height: 100vh; background: #0c0e11; z-index: 2001;
@@ -164,7 +169,6 @@ body {
 }
 .close-drawer { background: #1a1d21; border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
 
-/* Scrollable Cart Body */
 .cart-body { 
     padding: 20px; flex: 1; overflow-y: auto;
     scrollbar-width: none;
@@ -178,9 +182,6 @@ body {
     align-items: center;
 }
 .cart-item-img { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; background: #1a1d21; }
-.cart-item-details { flex: 1; }
-.cart-item-details h4 { font-size: 0.85rem; margin-bottom: 2px; color: #fff; font-weight: 600; }
-.cart-item-details p { font-size: 0.95rem; color: var(--primary); font-weight: 800; }
 
 .qty-control {
     display: flex; align-items: center; gap: 10px;
@@ -189,14 +190,14 @@ body {
 }
 .qty-btn { background: none; border: none; color: var(--primary); font-size: 1.1rem; font-weight: bold; cursor: pointer; }
 
-/* FIXED FOOTER SYSTEM */
+/* FIXED FOOTER SYSTEM - Updated for Visibility */
 .cart-footer {
     padding: 24px; 
+    padding-bottom: 110px; /* Space for bottom nav and extra breathing room */
     background: #121417; 
     border-top: 1px solid var(--border-color);
     box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
-    margin-top: auto; /* Ensures it stays at bottom */
+    margin-top: auto;
 }
 
 .cart-summary { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: baseline; }
@@ -206,7 +207,7 @@ body {
 .master-checkout-btn {
     all: unset;
     background: var(--primary); color: #fff;
-    width: 100%; height: 56px; border-radius: 18px;
+    width: 100%; height: 58px; border-radius: 18px;
     font-weight: 800; font-size: 1rem; display: flex; 
     align-items: center; justify-content: center; gap: 12px;
     box-shadow: 0 10px 25px var(--primary-glow);

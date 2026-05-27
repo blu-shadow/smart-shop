@@ -3,57 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gents Choice - Admin Panel</title>
+<title>DadaXWear - Admin Panel</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { --primary: #e8491d; --dark: #0a0a0a; --card: #141414; --text-light: #ffffff; --text-gray: #a0a0a0; --border: rgba(255, 255, 255, 0.08); --success: #2ecc71; --danger: #ff4d4d; }
+:root {
+    --primary: #e8491d;
+    --dark: #0a0a0a;
+    --card: #141414;
+    --text-light: #ffffff;
+    --text-gray: #a0a0a0;
+    --border: rgba(255, 255, 255, 0.08);
+    --success: #2ecc71;
+    --danger: #ff4d4d;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 body { background-color: var(--dark); color: var(--text-light); padding-bottom: 80px; }
-    .header { background: #000; padding: 15px 20px; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 1.1rem; flex: 1; text-align: center; font-weight: 700; }
-    .header h1 span { color: var(--primary); }
 
-    .logout-btn { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
-    .logout-btn:hover { transform: scale(1.1); }
+/* ── Admin Panel ── */
+.header { background: #000; padding: 15px 20px; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 1.1rem; flex: 1; text-align: center; font-weight: 700; }
+.header h1 span { color: var(--primary); }
+.logout-btn { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+.logout-btn:hover { transform: scale(1.1); }
+.container { padding: 15px; max-width: 800px; margin: 0 auto; }
+h2 { font-size: 0.9rem; margin: 25px 0 12px; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+.form-card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+.input-group { margin-bottom: 15px; }
+label { display: block; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 5px; }
+input, textarea, select { background: #222; color: #fff; padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #333; font-size: 0.9rem; outline: none; transition: 0.3s; }
+input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+.action-btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s; }
+.action-btn:hover { background: #ff5e31; }
+#currentLogo { max-width: 100px; margin-bottom: 15px; border-radius: 8px; background: #fff; padding: 4px; display: none; margin: 0 auto 15px; }
+.list-container { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid var(--border); min-height: 100px; }
+.order-card { background: #1a1a1a; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
+#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2000; display: none; font-size: 0.85rem; }
+#toast.show { display: block; animation: fadeInUp 0.3s ease; }
+@keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.loading-spinner { text-align: center; padding: 30px; color: var(--text-gray); }
 
-    .container { padding: 15px; max-width: 800px; margin: 0 auto; }
-    h2 { font-size: 0.9rem; margin: 25px 0 12px; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+/* ── LOGIN OVERLAY ── */
+#login-overlay {
+    position: fixed;
+    inset: 0;
+    background: #09090b;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.login-box {
+    background: #111113;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    animation: loginSlide 0.35s ease-out;
+}
+@keyframes loginSlide {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+.login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.login-logo .brand-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(232,73,29,0.12);
+    border: 1px solid rgba(232,73,29,0.3);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 1.6rem;
+    color: var(--primary);
+}
+.login-logo h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 4px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.login-logo p {
+    font-size: 0.78rem;
+    color: #666;
+}
+.login-field {
+    margin-bottom: 14px;
+}
+.login-field label {
+    display: block;
+    font-size: 0.72rem;
+    color: #777;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.login-input-wrap {
+    position: relative;
+}
+.login-input-wrap i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+.login-input-wrap input {
+    background: #1a1a1c;
+    border: 1px solid #2a2a2e;
+    color: #fff;
+    padding: 12px 12px 12px 38px;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.login-input-wrap input:focus {
+    border-color: var(--primary);
+}
+.toggle-pw {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px;
+}
+.toggle-pw:hover { color: #999; }
 
-    .form-card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
-    .input-group { margin-bottom: 15px; }
-    label { display: block; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 5px; }
+.login-error {
+    background: rgba(255,77,77,0.1);
+    border: 1px solid rgba(255,77,77,0.3);
+    color: #ff6b6b;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+.login-error.show { display: flex; }
 
-    input, textarea, select { background: #222; color: #fff; padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #333; font-size: 0.9rem; outline: none; transition: 0.3s; }
-    input:focus, select:focus { border-color: var(--primary); }
+.login-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+    margin-top: 6px;
+}
+.login-btn:hover:not(:disabled) { background: #ff5e31; }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .action-btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s; }
-    .action-btn:hover { background: #ff5e31; }
-
-    #currentLogo { max-width: 100px; margin-bottom: 15px; border-radius: 8px; background: #fff; padding: 4px; display: none; margin: 0 auto 15px; }
-
-    .list-container { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid var(--border); min-height: 100px; }
-
-    .order-card { background: #1a1a1a; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-
-    #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2000; display: none; font-size: 0.85rem; }
-    #toast.show { display: block; animation: fadeInUp 0.3s ease; }
-
-    @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
-    .loading-spinner { text-align: center; padding: 30px; color: var(--text-gray); }
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.72rem;
+    color: #444;
+}
 </style>
-
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN OVERLAY — authenticated হলে hidden হবে
+════════════════════════════════════════════════ -->
+<div id="login-overlay">
+    <div class="login-box">
+        <div class="login-logo">
+            <div class="brand-icon"><i class="fas fa-shield-alt"></i></div>
+            <h2>Admin Panel</h2>
+            <p>DadaXWear secure login</p>
+        </div>
+
+        <div class="login-error" id="login-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="login-error-msg">Invalid credentials</span>
+        </div>
+
+        <div class="login-field">
+            <label>Email Address</label>
+            <div class="login-input-wrap">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="login-email" placeholder="admin@dadaxwear.com" autocomplete="email">
+            </div>
+        </div>
+
+        <div class="login-field">
+            <label>Password</label>
+            <div class="login-input-wrap">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="login-password" placeholder="••••••••••" autocomplete="current-password">
+                <button type="button" class="toggle-pw" onclick="togglePassword()" id="toggle-pw-btn">
+                    <i class="fas fa-eye" id="pw-eye-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <button class="login-btn" id="login-btn" onclick="doAdminLogin()">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+
+        <div class="login-footer">
+            DadaXWear v4.5 &nbsp;·&nbsp; Admin Access Only
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ADMIN PANEL — login এর পরে দেখাবে
+════════════════════════════════════════════════ -->
+<div id="admin-panel" style="display:none;">
+
 <header class="header">
-<a href="index.html" style="color:#fff; text-decoration:none;"><i class="fas fa-home"></i></a>
-<h1>Gents <span>Choice</span> Admin</h1>
-<button class="logout-btn" onclick="handleAdminLogout()" title="Logout">
-<i class="fas fa-sign-out-alt"></i>
-</button>
+    <a href="index.html" style="color:#fff; text-decoration:none;"><i class="fas fa-home"></i></a>
+    <h1>DADA<span>X</span>WEAR Admin</h1>
+    <button class="logout-btn" onclick="handleAdminLogout()" title="Logout">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
 </header>
+
 <div class="container">
-    <!-- ১. লোগো আপডেট -->
+    <!-- ১. লোগো -->
     <h2><i class="fas fa-image"></i> Shop Logo</h2>
     <div class="form-card" style="text-align: center;">
         <img id="currentLogo" src="" alt="Logo">
@@ -63,7 +261,7 @@ body { background-color: var(--dark); color: var(--text-light); padding-bottom: 
         <button id="logoBtn" class="action-btn" onclick="updateLogo()">Update Logo</button>
     </div>
 
-    <!-- ২. অ্যাড প্রোডাক্ট ফর্ম -->
+    <!-- ২. প্রোডাক্ট যোগ -->
     <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
     <div class="form-card">
         <div class="input-group">
@@ -74,7 +272,7 @@ body { background-color: var(--dark); color: var(--text-light); padding-bottom: 
             <label>Category</label>
             <select id="pCategory">
                 <option value="All">All</option>
-                <option value="Popular iteam">Popular iteam</option>
+                <option value="Popular iteam">Popular item</option>
                 <option value="Esport jersey">Esport jersey</option>
                 <option value="Football Jersey">Football Jersey</option>
                 <option value="Finger sleeve">Finger sleeve</option>
@@ -116,33 +314,124 @@ body { background-color: var(--dark); color: var(--text-light); padding-bottom: 
     </div>
 </div>
 
+</div><!-- /admin-panel -->
+
 <div id="toast"></div>
 
 <script src="admin.js"></script>
 <script>
-    // Auth Check
-    if (localStorage.getItem('adminAuth') !== 'true') {
-        window.location.replace('login.html');
-    }
-
-    // Logout Function - Fixed Quotes
-    function handleAdminLogout() {
-        if(confirm("Do you want to logout?")) {
-            localStorage.removeItem('adminAuth');
-            window.location.replace('index.html');
+// ── Gallery max 3 ──
+const galleryInput = document.getElementById('pGallery');
+if (galleryInput) {
+    galleryInput.addEventListener('change', function() {
+        if (this.files.length > 3) {
+            alert("Please select maximum 3 gallery images.");
+            this.value = '';
         }
+    });
+}
+
+// ── Password show/hide ──
+function togglePassword() {
+    const input = document.getElementById('login-password');
+    const icon  = document.getElementById('pw-eye-icon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// ── Enter key login ──
+document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doAdminLogin();
+});
+document.getElementById('login-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+
+// ── Login function ──
+async function doAdminLogin() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn      = document.getElementById('login-btn');
+    const errorEl  = document.getElementById('login-error');
+    const errorMsg = document.getElementById('login-error-msg');
+
+    errorEl.classList.remove('show');
+
+    if (!email || !password) {
+        errorMsg.textContent = 'Email ও password দিন';
+        errorEl.classList.add('show');
+        return;
     }
 
-    // Gallery selection limit - Fixed Quotes
-    const galleryInput = document.getElementById('pGallery');
-    if(galleryInput) {
-        galleryInput.addEventListener('change', function() {
-            if (this.files.length > 3) {
-                alert("Please select maximum 3 gallery images.");
-                this.value = '';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+    try {
+        const res  = await fetch('/api/admin/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success && data.token) {
+            localStorage.setItem('dxw_admin_token', data.token);
+            // overlay সরাও, panel দেখাও
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-panel').style.display  = 'block';
+            // admin data load
+            loadAdminProducts();
+            loadOrders();
+            loadLogo();
+        } else {
+            errorMsg.textContent = data.message || 'Invalid credentials';
+            errorEl.classList.add('show');
+            document.getElementById('login-password').value = '';
+        }
+    } catch (err) {
+        errorMsg.textContent = 'Server connection error';
+        errorEl.classList.add('show');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    }
+}
+
+// Page load এ token check
+window.addEventListener('load', () => {
+    const token = localStorage.getItem('dxw_admin_token');
+    if (token) {
+        // Token আছে — server এ verify করো
+        fetch('/api/orders?limit=1', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(res => {
+            if (res.ok || res.status !== 401) {
+                // Valid token — panel দেখাও
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-panel').style.display  = 'block';
+                loadAdminProducts();
+                loadOrders();
+                loadLogo();
+            } else {
+                // Expired/invalid — login form দেখাও
+                localStorage.removeItem('dxw_admin_token');
             }
+        }).catch(() => {
+            // Network error — token থাকলেও panel দেখাও
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-panel').style.display  = 'block';
+            loadAdminProducts();
+            loadOrders();
+            loadLogo();
         });
     }
+    // Token না থাকলে login overlay-ই থাকবে (default)
+});
 </script>
 
 </body>

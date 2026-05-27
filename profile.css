@@ -12,11 +12,14 @@ body {
     background-color: var(--bg-dark);
     font-family: 'Poppins', sans-serif;
     color: var(--text-white);
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .profile-dashboard {
     padding: 20px;
     padding-bottom: 100px;
+    max-width: 500px; /* Standard mobile width */
+    margin: 0 auto;
 }
 
 /* Top Bar */
@@ -25,6 +28,12 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+}
+
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .help-action-btn {
@@ -38,15 +47,16 @@ body {
     border: 1px solid rgba(255, 140, 0, 0.3);
 }
 
-.settings-action-btn {
+.notification-action-btn, .settings-action-btn {
     color: var(--text-white);
-    font-size: 22px;
+    font-size: 20px;
+    text-decoration: none;
 }
 
 /* Profile Main Card */
 .profile-main-card {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .profile-avatar {
@@ -57,6 +67,8 @@ body {
     border: 4px solid var(--accent);
     padding: 3px;
     background: var(--bg-dark);
+    position: relative;
+    overflow: hidden;
 }
 
 .profile-avatar img {
@@ -70,19 +82,20 @@ body {
     font-size: 22px;
     margin: 0;
     font-weight: 700;
+    color: var(--text-white);
 }
 
 .profile-main-card p {
     color: var(--accent);
     font-size: 14px;
-    margin-top: 5px;
+    margin: 5px 0 0;
 }
 
 /* Info List */
 .info-container {
     background: var(--card-bg);
     border-radius: 25px;
-    padding: 10px 20px;
+    padding: 5px 20px;
     margin-bottom: 30px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -90,8 +103,10 @@ body {
 .info-row {
     display: flex;
     justify-content: space-between;
+    align-items: center; /* Vertically center */
     padding: 18px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 10px; /* Space between label and value */
 }
 
 .info-row:last-child {
@@ -101,36 +116,47 @@ body {
 .info-label {
     color: var(--text-dim);
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* Keep label on one line */
 }
 
 .info-label i {
     color: var(--accent);
-    margin-right: 8px;
-    width: 20px;
+    margin-right: 10px;
+    width: 18px;
+    text-align: center;
 }
 
 .info-value {
     color: var(--text-white);
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 500;
+    font-size: 13px; /* Slightly smaller for better fit */
     text-align: right;
-    max-width: 60%;
+    word-break: break-all; /* Breaks long emails if necessary */
+    max-width: 65%;
+    line-height: 1.2;
+}
+
+/* Specific fix for long addresses or emails */
+#display-email, #display-address {
+    font-size: 12px; /* Auto-fit strategy */
 }
 
 /* Buttons */
 .profile-footer-actions {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .edit-profile-btn, .sign-out-btn {
     width: 100%;
-    padding: 16px;
+    padding: 15px;
     border-radius: 15px;
     border: none;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -147,11 +173,11 @@ body {
 .sign-out-btn {
     background: #252a34;
     color: #ff4444;
-    border: 1px solid rgba(255, 68, 68, 0.2);
+    border: 1px solid rgba(255, 68, 68, 0.1);
 }
 
 .edit-profile-btn:active, .sign-out-btn:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
 /* Bottom Nav Style */

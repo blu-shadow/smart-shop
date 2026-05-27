@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DadaXWear | Notifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent: #ff8c00;
+            --bg-dark: #0f1115;
+            --card-bg: #1a1d24;
+            --text-white: #ffffff;
+            --text-dim: #a0a0a0;
+            --danger: #ff4d4d;
+            --success: #2ecc71;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+
+        .notification-page {
+            padding: 20px;
+            padding-bottom: 80px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-dark);
+            padding: 10px 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            color: var(--text-white);
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .clear-all {
+            color: var(--accent);
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        /* Notification List */
+        .notif-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .notif-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideIn 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 140, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .notif-content {
+            flex: 1;
+        }
+
+        .notif-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .notif-msg {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .notif-time {
+            font-size: 0.7rem;
+            color: #555;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .delete-btn {
+            color: #444;
+            background: none;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Status Colors */
+        .notif-card.shipped .notif-icon { background: rgba(46, 204, 113, 0.1); color: var(--success); }
+        .notif-card.cancelled .notif-icon { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.2;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: none;
+            z-index: 1000;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="notification-page">
+        <div class="top-bar">
+            <a href="profile.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <h2>Notifications</h2>
+            <button class="clear-all" onclick="clearAllNotifications()">Clear All</button>
+        </div>
+
+        <div id="notifList" class="notif-container">
+            <!-- Notifications will appear here -->
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Khujchi...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const API_BASE = 'https://dadaxwear.com/api';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchNotifications();
+        });
+
+        async function fetchNotifications() {
+            const userPhone = localStorage.getItem('user_phone');
+            const notifSettings = localStorage.getItem('notifications_enabled'); // 'false' hole bondho
+
+            // Setting check: Jodi notification off thake
+            if (notifSettings === 'false') {
+                showEmptyState("Notification settings theke bondho kora ase.");
+                return;
+            }
+
+            if (!userPhone) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/notifications/${userPhone}`);
+                const data = await res.json();
+                renderNotifications(data);
+            } catch (err) {
+                console.error("Error:", err);
+                showEmptyState("Server theke data ante somossa hoyese.");
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifList');
+            
+            if (!notifications || notifications.length === 0) {
+                showEmptyState("Kono notun notification nei.");
+                return;
+            }
+
+            container.innerHTML = notifications.map(n => {
+                const statusClass = n.status ? n.status.toLowerCase() : '';
+                const time = new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const date = new Date(n.createdAt).toLocaleDateString();
+
+                return `
+                    <div class="notif-card ${statusClass}" id="notif-${n._id}">
+                        <div class="notif-icon">
+                            <i class="${getIcon(n.status)}"></i>
+                        </div>
+                        <div class="notif-content">
+                            <span class="notif-title">${n.status || 'Order Update'}</span>
+                            <p class="notif-msg">${n.message}</p>
+                            <span class="notif-time">${date} | ${time}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteNotification('${n._id}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getIcon(status) {
+            switch(status) {
+                case 'Shipped': return 'fas fa-shipping-fast';
+                case 'Delivered': return 'fas fa-check-circle';
+                case 'Cancelled': return 'fas fa-times-circle';
+                case 'Processing': return 'fas fa-sync';
+                default: return 'fas fa-bell';
+            }
+        }
+
+        async function deleteNotification(id) {
+            if(!confirm("Eti delete korte chan?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/notifications/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    const el = document.getElementById(`notif-${id}`);
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.remove();
+                        if (document.querySelectorAll('.notif-card').length === 0) {
+                            showEmptyState("Sob delete kora hoyese.");
+                        }
+                    }, 300);
+                    showToast("Delete hoyese");
+                }
+            } catch (err) {
+                showToast("Somossa hoyese");
+            }
+        }
+
+        async function clearAllNotifications() {
+            const userPhone = localStorage.getItem('user_phone');
+            if(!confirm("Sob notification delete korben?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/notifications/clear/${userPhone}`, { method: 'DELETE' });
+                if (res.ok) {
+                    fetchNotifications();
+                    showToast("Sob clear hoyese");
+                }
+            } catch (err) {
+                showToast("Somossa hoyese");
+            }
+        }
+
+        function showEmptyState(msg) {
+            document.getElementById('notifList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>${msg}</p>
+                </div>`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+    </script>
+</body>
+</html>

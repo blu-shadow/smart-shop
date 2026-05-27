@@ -1,180 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DadaXWear | Premium Jersey & Sportswear</title>
-    
-    <meta name="description" content="Premium quality jerseys for football fans.">
-    <meta name="theme-color" content="#090a0b">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DadaXWear | Premium Jersey & Sportswear</title>
+<!-- FAVICON (Google Search Logo) -->
+<link rel="icon" type="image/png" href="uploads/logos/default.png">
+<link rel="apple-touch-icon" href="uploads/logos/default.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Montserrat:wght@800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="stylesheet" href="style.css">
+<meta name="description" content="Premium quality jerseys for football fans.">
+<meta name="theme-color" content="#090a0b">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet" href="style.css">
+<style>
+    /* Notification and Profile Image specific styles */
+    .notification-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        position: relative;
+    }
+    .user-trigger {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid var(--primary);
+        padding: 2px;
+        overflow: hidden;
+    }
+    #user-logo-display {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
+
 </head>
 <body class="dark-theme">
+<div id="toast-container">
+    <div id="toast"></div>
+</div>
 
-    <div id="toast-container">
-        <div id="toast"></div>
+<!-- Header -->
+<header class="top-header">
+    <div class="header-container">
+        <div class="brand" onclick="location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-wrapper">
+                <img src="uploads/logos/default.png" id="site-logo-display" class="web-logo" alt="Logo">
+            </div>
+            <div class="brand-info">
+                <h1 class="logo-text">DADA<span>X</span>WEAR</h1>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <!-- Admin Dashboard soriye Notification Button deya holo -->
+            <a href="notification.html" class="notification-btn" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <!-- Unread dot (optional logic) -->
+                <span id="notif-dot" style="display:none; position:absolute; top:8px; right:8px; width:8px; height:8px; background:var(--primary); border-radius:50%;"></span>
+            </a>
+            
+            <div class="user-trigger" onclick="location.href='profile.html'" style="cursor: pointer;">
+                <!-- Default image, script.js diye dynamic kora hobe -->
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" id="user-logo-display" alt="User">
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <!-- Category Filter -->
+    <div class="category-wrapper">
+        <div class="category-slider">
+            <button class="cat-pill active" onclick="filterByCategory('all', this)">All</button>
+            <button class="cat-pill" onclick="filterByCategory('esport-jersey', this)">Esport jersey</button>
+            <button class="cat-pill" onclick="filterByCategory('football-jersey', this)">Football Jersey</button>
+            <button class="cat-pill" onclick="filterByCategory('finger-sleeve', this)">Finger sleeve</button>
+            <button class="cat-pill" onclick="filterByCategory('colin-fan', this)">Colin fan</button>
+            <button class="cat-pill" onclick="filterByCategory('ff-card', this)">Ff card</button>
+        </div>
     </div>
 
-    <!-- Header -->
-    <header class="top-header">
-        <div class="header-container">
-            <div class="brand" onclick="location.href='index.html'" style="cursor: pointer;">
-                <div class="logo-wrapper">
-                    <img src="uploads/logos/default.png" id="site-logo-display" class="web-logo" alt="Logo">
-                </div>
-                <div class="brand-info">
-                    <h1 class="logo-text">DADA<span>X</span>WEAR</h1>
-                </div>
-            </div>
-            
-            <div class="header-actions">
-                <a href="admin.html" class="admin-badge" title="Admin Dashboard">
-                    <i class="fas fa-shield-halved"></i>
-                </a>
-                
-                <div class="user-trigger" onclick="location.href='profile.html'" style="cursor: pointer;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" id="user-logo-display" alt="User">
-                </div>
-            </div>
-        </div>
-    </header>
+<!-- Trending Section ID যোগ করা হয়েছে -->
+<section class="section-container" id="trending-section">
+    <div class="section-header">
+        <h2 class="section-title">Trending Items</h2>
+        <span class="badge-count" id="pop-count">0</span>
+    </div>
+    <div class="product-grid" id="popular-products">
+        <div style="grid-column: 1/-1; text-align: center; padding: 20px; opacity: 0.5;">Loading trends...</div>
+    </div>
+</section>
 
-    <main class="main-content">
-        <!-- Category Filter -->
-        <div class="category-wrapper">
-            <div class="category-slider">
-                <button class="cat-pill active" onclick="filterByCategory('all', this)">All</button>
-                <!-- Popular Item ক্যাটাগরি নাম ডাটাবেসের সাথে হুবহু মিলানো হয়েছে -->
-                <button class="cat-pill" onclick="filterByCategory('esport-jersey', this)">Esport jersey</button>
-                <button class="cat-pill" onclick="filterByCategory('football-jersey', this)">Football Jersey</button>
-                <button class="cat-pill" onclick="filterByCategory('finger-sleeve', this)">Finger sleeve</button>
-                <button class="cat-pill" onclick="filterByCategory('colin-fan', this)">Colin fan</button>
-                <button class="cat-pill" onclick="filterByCategory('ff-card', this)">Ff card</button>
-            </div>
-        </div>
+<section class="section-container" style="padding-bottom: 100px;">
+    <div class="section-header">
+        <h2 class="section-title">All Collection</h2>
+    </div>
+    <div class="product-grid" id="all-products"></div>
+</section>
 
-        <!-- Trending Section -->
-        <section class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">Trending Items</h2>
-                <span class="badge-count" id="pop-count">0</span>
-            </div>
-            <!-- popular-products আইডি ঠিক আছে -->
-            <div class="product-grid" id="popular-products">
-                <div style="grid-column: 1/-1; text-align: center; padding: 20px; opacity: 0.5;">Loading trends...</div>
-            </div>
-        </section>
-
-        <!-- All Collection Section -->
-        <section class="section-container" style="padding-bottom: 100px;">
-            <div class="section-header">
-                <h2 class="section-title">All Collection</h2>
-            </div>
-            <div class="product-grid" id="all-products">
-                <!-- Data loaded by script.js -->
-            </div>
-        </section>
-    </main>
-
-    <!-- Cart Drawer -->
-    <div id="cart-drawer" class="cart-drawer">
-        <div class="cart-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-shopping-bag" style="color: var(--primary);"></i>
-                <h3 style="font-weight: 700; font-size: 1.1rem;">My Shopping Bag</h3>
-            </div>
-            <button class="close-drawer" onclick="toggleCart()">
-                <i class="fas fa-times"></i>
-            </button>
+<!-- Cart Drawer -->
+<div id="cart-drawer" class="cart-drawer">
+    <div class="cart-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-shopping-bag" style="color: var(--primary);"></i>
+            <h3 style="font-weight: 700; font-size: 1.1rem;">My Shopping Bag</h3>
         </div>
-        
-        <div id="cart-items-list" class="cart-body">
-            <!-- Empty state default -->
-        </div>
-        
-        <div class="cart-footer" id="cart-footer" style="display: none;">
-            <div class="cart-summary" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span style="font-weight: 600; color: #8e9aaf;">Subtotal:</span>
-                <span style="font-weight: 800; color: var(--primary); font-size: 1.2rem;">
-                    <span id="cart-subtotal">0</span> TK
-                </span>
-            </div>
-            <button class="master-checkout-btn" onclick="goToCheckout()">
-                <span>PROCEED TO CHECKOUT</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
+        <button class="close-drawer" onclick="toggleCart()">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
     
-    <div id="cart-overlay" onclick="toggleCart()"></div>
-
-    <!-- Bottom Nav -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-link active">
-            <i class="fas fa-home"></i>
-            <span class="nav-label">Home</span>
-        </a>
-        <div class="nav-link" onclick="toggleCart()" style="cursor: pointer;">
-            <div class="cart-icon-box" style="position: relative;">
-                <i class="fas fa-shopping-bag"></i>
-                <div id="cart-count-badge" class="badge-pulse">0</div>
-            </div>
-            <span class="nav-label">Cart</span>
+    <div id="cart-items-list" class="cart-body"></div>
+    
+    <div class="cart-footer" id="cart-footer" style="display: none;">
+        <div class="cart-summary" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <span style="font-weight: 600; color: #8e9aaf;">Subtotal:</span>
+            <span style="font-weight: 800; color: var(--primary); font-size: 1.2rem;">
+                <span id="cart-subtotal">0</span> TK
+            </span>
         </div>
-        <a href="https://wa.me/8801333135115" class="nav-link">
-            <i class="fab fa-whatsapp"></i>
-            <span class="nav-label">Help</span>
-        </a>
-        <a href="profile.html" class="nav-link">
-            <i class="fas fa-user-circle"></i>
-            <span class="nav-label">Account</span>
-        </a>
-    </nav>
+        <button class="master-checkout-btn" onclick="goToCheckout()">
+            <span>PROCEED TO CHECKOUT</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="script.js"></script>
-    <script>
-        // ডিটেইলস পেজে যাওয়ার মেইন ফাংশন - Hostinger এবং URL এরর ফিক্স
-        window.goToDetails = function(id) {
-            if (!id) {
-                console.error("Product ID missing");
-                return;
+<div id="cart-overlay" onclick="toggleCart()"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-link active">
+        <i class="fas fa-home"></i>
+        <span class="nav-label">Home</span>
+    </a>
+    <div class="nav-link" onclick="toggleCart()" style="cursor: pointer;">
+        <div class="cart-icon-box" style="position: relative;">
+            <i class="fas fa-shopping-bag"></i>
+            <div id="cart-count-badge" class="badge-pulse">0</div>
+        </div>
+        <span class="nav-label">Cart</span>
+    </div>
+    <a href="https://wa.me/8801333-135115" class="nav-link">
+        <i class="fab fa-whatsapp"></i>
+        <span class="nav-label">Help</span>
+    </a>
+    <a href="profile.html" class="nav-link">
+        <i class="fas fa-user-circle"></i>
+        <span class="nav-label">Account</span>
+    </a>
+</nav>
+
+<!-- Scripts -->
+<script src="script.js"></script>
+<script>
+// Profile Image Load Logic for Main Page
+document.addEventListener('DOMContentLoaded', async () => {
+    const userImg = document.getElementById('user-logo-display'); // আপনার ইমেজের আইডি চেক করুন
+    const userPhone = localStorage.getItem('user_phone');
+    const SITE_DOMAIN = 'https://dadaxwear.com';
+
+    // ১. প্রথমেই লোকাল স্টোরেজে সেভ করা ইমেজ থাকলে সেটা দেখাবে (ফাস্ট লোড)
+    const cachedImg = localStorage.getItem('user_img');
+    if (cachedImg && userImg) {
+        userImg.src = cachedImg;
+    }
+
+    // ২. এবার সার্ভার থেকে লেটেস্ট ইমেজ ডাটা নিয়ে আসবে (রিয়েল টাইম আপডেট)
+    if (userPhone) {
+        try {
+            const res = await fetch(`${SITE_DOMAIN}/api/user/get-profile/${userPhone.trim()}`);
+            const data = await res.json();
+
+            if (data.exists && data.user.profileImage && userImg) {
+                const fullImgUrl = data.user.profileImage.startsWith('http') 
+                    ? data.user.profileImage 
+                    : `${SITE_DOMAIN}${data.user.profileImage}`;
+                
+                // ইমেজ সেট করা
+                userImg.src = fullImgUrl;
+                
+                // ভবিষ্যতে ব্যবহারের জন্য লোকাল স্টোরেজে সেভ রাখা
+                localStorage.setItem('user_img', fullImgUrl);
             }
-            // সরাসরি আইডি পাস করা হচ্ছে
-            window.location.href = `product-details.html?id=${id.trim()}`;
-        };
-
-        function toggleCart() {
-            const drawer = document.getElementById('cart-drawer');
-            const overlay = document.getElementById('cart-overlay');
-            if(!drawer || !overlay) return;
-            
-            const isOpen = drawer.classList.toggle('open');
-            overlay.style.display = isOpen ? 'block' : 'none';
-            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        } catch (err) {
+            console.error("Profile Sync Failed:", err);
         }
+    }
+});
 
-        function goToCheckout() {
-            const cartData = JSON.parse(localStorage.getItem('dxw_cart')) || [];
-            if (cartData.length > 0) {
-                window.location.href = 'checkout.html';
-            } else {
-                showToast("🛒 Your bag is empty!");
-            }
-        }
+    window.goToDetails = function(id) {
+        if (!id) return;
+        window.location.href = `product-details.html?id=${id.trim()}`;
+    };
 
-        // Helper function for local toast if script.js isn't ready
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            if(!toast) return;
-            toast.innerText = msg;
-            document.body.classList.add('show-toast');
-            setTimeout(() => document.body.classList.remove('show-toast'), 3000);
+    function toggleCart() {
+        const drawer = document.getElementById('cart-drawer');
+        const overlay = document.getElementById('cart-overlay');
+        if(!drawer || !overlay) return;
+        const isOpen = drawer.classList.toggle('open');
+        overlay.style.display = isOpen ? 'block' : 'none';
+        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+    }
+
+    function goToCheckout() {
+        const cartData = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+        if (cartData.length > 0) {
+            window.location.href = 'checkout.html';
+        } else {
+            showToast("🛒 Your bag is empty!");
         }
-    </script>
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        if(!toast) return;
+        toast.innerText = msg;
+        document.body.classList.add('show-toast');
+        setTimeout(() => document.body.classList.remove('show-toast'), 3000);
+    }
+</script>
+
 </body>
 </html>
+

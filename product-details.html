@@ -5,245 +5,509 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details | DadaXWear</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
         :root {
-            --bg: #0d0f12;
-            --card: #161a1e;
+            --bg: #0a0a0b;
+            --surface: #131416;
+            --surface2: #1c1d21;
+            --surface3: #222428;
             --primary: #e8491d;
-            --text: #ffffff;
-            --text-gray: #8e9aaf;
-            --border: rgba(255, 255, 255, 0.08);
+            --primary-dim: rgba(232,73,29,0.12);
+            --primary-mid: rgba(232,73,29,0.4);
+            --text: #f0ede8;
+            --text-muted: #55555e;
+            --text-mid: #8e8e9a;
+            --border: rgba(255,255,255,0.07);
+            --border-bright: rgba(255,255,255,0.13);
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
         }
-        body { background: var(--bg); color: var(--text); margin: 0; font-family: 'Poppins', sans-serif; padding-bottom: 100px; }
-        .details-wrapper { max-width: 600px; margin: 0 auto; }
 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        /* body & wrapper share the same surface colour
+           so scrolling past content never shows a black void */
+        body {
+            background: var(--surface);
+            color: var(--text);
+            font-family: var(--font-body);
+            padding-bottom: 110px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .details-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--surface);
+        }
+
+        /* ── Back Nav ── */
         .back-nav {
-            position: fixed; top: 20px; left: 20px; z-index: 1000;
-            background: rgba(0,0,0,0.5); color: #fff;
-            width: 45px; height: 45px; border-radius: 50%;
+            position: fixed; top: 18px; left: 18px; z-index: 1001;
+            width: 42px; height: 42px; border-radius: 50%;
+            background: rgba(10,10,11,0.75);
+            border: 1px solid var(--border-bright);
+            color: var(--text);
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); transition: 0.3s; text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+            font-size: 0.85rem;
+        }
+        .back-nav:hover { background: rgba(232,73,29,0.25); transform: scale(1.05); }
+
+        /* ── Hero ── */
+        .product-hero {
+            position: relative;
+            width: 100%;
+            height: 460px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+        .swiper { width: 100%; height: 100%; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+        .swiper-pagination { bottom: 72px !important; }
+        .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.4); opacity: 1;
+            width: 6px; height: 6px; transition: all 0.3s;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--primary); width: 24px; border-radius: 3px;
         }
 
-        /* Swiper Slider Styling */
-        .swiper { width: 100%; height: 450px; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; overflow: hidden; }
-        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; background: #1a1d21; }
-        .swiper-pagination-bullet { background: #fff; opacity: 0.5; }
-        .swiper-pagination-bullet-active { background: var(--primary); opacity: 1; width: 20px; border-radius: 5px; }
+        /* gradient matching surface (not bg) so blend is seamless */
+        .hero-gradient {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 240px;
+            background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
+            z-index: 2; pointer-events: none;
+        }
 
+        /* ── Details Card ── */
         .details-card {
-            background: var(--card); margin-top: -40px; border-radius: 40px 40px 0 0;
-            padding: 35px 25px; position: relative; z-index: 10;
-            border: 1px solid var(--border); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            background: var(--surface);
+            margin-top: -44px;
+            border-radius: 26px 26px 0 0;
+            border-top: 1px solid var(--border-bright);
+            padding: 10px 20px 28px;
+            position: relative; z-index: 10;
+            animation: slide-up 0.45s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        /* drag handle pill */
+        .details-card::before {
+            content: '';
+            display: block;
+            width: 34px; height: 4px;
+            border-radius: 2px;
+            background: var(--border-bright);
+            margin: 10px auto 22px;
         }
 
+        /* ── Badge ── */
         .p-badge {
-            background: rgba(232, 73, 29, 0.1); color: var(--primary);
-            padding: 6px 16px; border-radius: 50px; font-size: 0.7rem;
-            font-weight: 700; text-transform: uppercase; display: inline-block;
-            margin-bottom: 10px; border: 1px solid rgba(232, 73, 29, 0.2);
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--primary-dim);
+            color: var(--primary);
+            border: 1px solid rgba(232,73,29,0.28);
+            padding: 5px 13px;
+            border-radius: 50px;
+            font-size: 0.62rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            margin-bottom: 14px;
+        }
+        .p-badge::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: var(--primary); flex-shrink: 0;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100%{ opacity:1; transform:scale(1); }
+            50%    { opacity:0.4; transform:scale(0.7); }
         }
 
-        .p-name { font-size: 1.6rem; font-weight: 800; margin: 10px 0; line-height: 1.3; }
-        .p-price-big { font-size: 1.8rem; color: var(--primary); font-weight: 800; margin-bottom: 25px; }
-
-        .selector-label { font-size: 0.85rem; color: var(--text-gray); margin-bottom: 12px; font-weight: 500; }
-
-        .size-grid { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px; }
-        .size-chip {
-            min-width: 60px; padding: 12px; border: 1px solid var(--border);
-            border-radius: 15px; text-align: center; cursor: pointer;
-            font-weight: 700; transition: 0.3s; background: #1a1d21; font-size: 0.9rem;
+        /* ── Name + Price ── */
+        .p-header {
+            display: flex; justify-content: space-between;
+            align-items: flex-end; gap: 10px; margin-bottom: 20px;
         }
-        .size-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .p-name {
+            font-family: var(--font-display);
+            font-size: 2.2rem; line-height: 0.95;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: var(--text); flex: 1;
+        }
+        .p-price-wrap { text-align: right; flex-shrink: 0; }
+        .p-price-big {
+            font-family: var(--font-display);
+            font-size: 1.95rem; color: var(--primary);
+            letter-spacing: 0.5px; line-height: 1;
+        }
+        .p-price-label {
+            font-size: 0.57rem; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted); margin-top: 3px;
+        }
 
-        .desc-box { border-top: 1px solid var(--border); padding-top: 25px; margin-top: 10px; }
-        .desc-box p { color: var(--text-gray); line-height: 1.8; font-size: 0.95rem; }
+        /* ── Divider ── */
+        .divider { width:100%; height:1px; background:var(--border); margin:20px 0; }
 
+        /* ── Labels ── */
+        .section-label {
+            font-size: 0.62rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.6px;
+            color: var(--text-muted); margin-bottom: 12px;
+        }
+
+        /* ── Description ── */
+        .desc-box { margin-bottom: 8px; }
+        .desc-content {
+            position: relative; overflow: hidden;
+            max-height: 96px;
+            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        .desc-content.expanded { max-height: 4000px; }
+        .desc-content::after {
+            content: ''; position: absolute;
+            bottom:0; left:0; right:0; height: 52px;
+            background: linear-gradient(to top, var(--surface), transparent);
+            pointer-events: none; transition: opacity 0.3s;
+        }
+        .desc-content.expanded::after { opacity:0; }
+        .desc-content p, .desc-content div {
+            color: var(--text-mid); line-height: 1.75;
+            font-size: 0.875rem; white-space: pre-wrap;
+            word-break: break-word; font-weight: 300;
+        }
+        .read-more-btn {
+            background: none; border: none; color: var(--primary);
+            font-family: var(--font-body); font-weight: 700;
+            font-size: 0.8rem; cursor: pointer; padding: 10px 0 0;
+            display: none; align-items: center; gap: 6px;
+            letter-spacing: 0.3px; transition: opacity 0.2s;
+        }
+        .read-more-btn:hover { opacity: 0.7; }
+
+        /* ── Recommended ── */
+        .recommended-section { padding-bottom: 6px; }
+        .rec-swiper-outer { overflow: hidden; margin: 0 -20px; padding: 0 20px; }
+        .rec-swiper { overflow: visible !important; }
+
+        .rec-card {
+            background: var(--surface2);
+            border-radius: 18px; overflow: hidden;
+            border: 1px solid var(--border-bright);
+            display: flex; flex-direction: column; height: 100%;
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .rec-card:active { transform: scale(0.97); }
+        .rec-img-link {
+            display: block; width: 100%; aspect-ratio: 1/1;
+            overflow: hidden; background: var(--surface3);
+        }
+        .rec-img-link img {
+            width:100%; height:100%; object-fit:cover;
+            transition: transform 0.4s ease;
+        }
+        .rec-card:hover .rec-img-link img { transform: scale(1.04); }
+        .rec-info { padding: 11px 11px 13px; }
+        .rec-name {
+            font-size: 0.68rem; font-weight: 700; color: var(--text);
+            margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .rec-price {
+            font-family: var(--font-display);
+            font-size: 1.05rem; color: var(--primary);
+            margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+        .rec-actions { display: flex; gap: 7px; }
+        .rec-btn-cart {
+            width:36px; height:36px; border-radius:10px;
+            background:var(--surface3); color:var(--text-mid);
+            border:1px solid var(--border); cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.78rem; flex-shrink:0;
+            transition: color 0.18s, border-color 0.18s;
+        }
+        .rec-btn-cart:hover { color:var(--primary); border-color:var(--primary-mid); }
+        .rec-btn-buy {
+            flex:1; height:36px; border-radius:10px;
+            background:var(--primary); color:#fff; border:none;
+            font-family:var(--font-body); font-size:0.67rem;
+            font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+            cursor:pointer; transition:opacity 0.18s;
+        }
+        .rec-btn-buy:active { opacity:0.8; }
+
+        /* ── Sticky Action Bar ── */
+        /* solid background with a top border line — no black bleed-through */
         .sticky-actions {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(13, 15, 18, 0.95); padding: 20px;
-            display: flex; gap: 15px; border-top: 1px solid var(--border);
-            z-index: 200; backdrop-filter: blur(20px); max-width: 600px; margin: 0 auto;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 600px;
+            padding: 12px 20px 30px;
+            background: var(--surface);
+            border-top: 1px solid var(--border-bright);
+            display: none; gap: 12px;
+            z-index: 2000;
         }
 
         .cart-icon-btn {
-            width: 60px; height: 60px; border-radius: 18px;
-            background: #1a1d21; border: 1px solid var(--border);
-            color: var(--text); font-size: 1.4rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            width:58px; height:58px; border-radius:16px;
+            background:var(--surface2);
+            border:1px solid var(--border-bright);
+            color:var(--text); font-size:1.1rem; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
         }
+        .cart-icon-btn:hover  { border-color:var(--primary-mid); color:var(--primary); }
+        .cart-icon-btn:active { background:var(--surface3); }
 
         .buy-now-full {
-            flex: 1; border-radius: 18px; background: var(--primary);
-            color: white; border: none; font-weight: 800;
-            font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            flex:1; height:58px; border-radius:16px;
+            background:var(--primary); color:#fff; border:none;
+            font-family:var(--font-display);
+            font-size:1.2rem; letter-spacing:2px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            box-shadow: 0 4px 24px rgba(232,73,29,0.45);
+            transition: opacity 0.2s, transform 0.15s;
         }
+        .buy-now-full:hover  { opacity:0.88; }
+        .buy-now-full:active { transform:scale(0.975); }
 
+        /* ── Toast ── */
         #toast {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background: #fff; color: #000; padding: 12px 25px; border-radius: 50px;
-            font-weight: 700; font-size: 0.85rem; z-index: 2000; display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position:fixed; bottom:115px; left:50%;
+            transform:translateX(-50%) translateY(8px);
+            background:#f0ede8; color:#0a0a0b;
+            padding:11px 22px; border-radius:50px;
+            font-weight:700; font-size:0.78rem;
+            z-index:3000; opacity:0; pointer-events:none;
+            transition:opacity 0.28s, transform 0.28s;
+            letter-spacing:0.3px; white-space:nowrap;
+            box-shadow:0 8px 30px rgba(0,0,0,0.4);
         }
-        .show-toast #toast { display: block; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        #toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
 
-        #loading-state { text-align: center; padding: 200px 20px; }
-	// Ei code-ti shob page-er common JS file-e ba script tag-e thakbe
-(function() {
-    const savedTheme = localStorage.getItem('dxw_theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-    }
-})(); 	
-   </style>
+        /* ── Loading ── */
+        #loading-state {
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            height:100vh; gap:16px; color:var(--text-muted);
+        }
+        .loader-ring {
+            width:38px; height:38px;
+            border:2px solid var(--border-bright);
+            border-top-color:var(--primary);
+            border-radius:50%;
+            animation:spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        #loading-state p { font-size:0.72rem; letter-spacing:1.5px; text-transform:uppercase; }
+
+        @keyframes slide-up {
+            from { opacity:0; transform:translateY(24px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* ── Light Theme ── */
+        body.light-theme {
+            --bg:#e8e8e8; --surface:#f5f5f5; --surface2:#ececec; --surface3:#e2e2e2;
+            --text:#111214; --text-muted:#9d9da6; --text-mid:#5a5a62;
+            --border:rgba(0,0,0,0.07); --border-bright:rgba(0,0,0,0.14);
+        }
+    </style>
 </head>
 <body>
 
-    <div id="toast">✅ Added to Bag!</div>
-
+    <div id="toast">✓ Added to bag</div>
     <a href="index.html" class="back-nav"><i class="fas fa-arrow-left"></i></a>
 
     <div class="details-wrapper" id="main-content">
         <div id="loading-state">
-            <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
-            <p style="margin-top:20px; color: var(--text-gray);">Fetching details...</p>
+            <div class="loader-ring"></div>
+            <p>Loading Product</p>
         </div>
     </div>
 
-    <div class="sticky-actions" id="action-bar" style="display:none;">
-        <button class="cart-icon-btn" onclick="addToBag()">
+    <!-- ✅ Always visible after product loads for EVERY product type -->
+    <div class="sticky-actions" id="action-bar">
+        <button class="cart-icon-btn" id="cart-btn" onclick="addToBag()">
             <i class="fas fa-shopping-bag"></i>
         </button>
         <button class="buy-now-full" onclick="orderNow()">
-            Order Now <i class="fas fa-bolt" style="margin-left:8px;"></i>
+            Order Now <i class="fas fa-bolt"></i>
         </button>
     </div>
 
-    <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         const BASE_URL = 'https://dadaxwear.com';
-        const API_URL = `${BASE_URL}/api/products`;
+        const API_URL  = `${BASE_URL}/api/products`;
 
-        const getProductId = () => {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('id');
-        };
-
-        let product = null;
-        let selectedSize = 'L';
+        let product         = null;
+        let allProductsList = [];
 
         async function initPage() {
-            const id = getProductId();
+            const id = new URLSearchParams(window.location.search).get('id');
             if (!id) return;
-
             try {
-                const res = await fetch(`${API_URL}/${id}`);
-                if (res.ok) {
-                    product = await res.json();
-                } else {
-                    const allRes = await fetch(API_URL);
-                    const allProducts = await allRes.json();
-                    product = allProducts.find(p => p._id === id);
+                const res = await fetch(API_URL);
+                allProductsList = await res.json();
+                product = allProductsList.find(p => p._id === id);
+                if (product) {
+                    const recommended = allProductsList
+                        .filter(p => p.category === product.category && p._id !== product._id)
+                        .slice(0, 10);
+                    renderProduct(recommended);
+                    // ✅ show for ALL products, not just jerseys
+                    document.getElementById('action-bar').style.display = 'flex';
                 }
-                if (product) renderProduct();
             } catch (err) { console.error(err); }
         }
 
-        function renderProduct() {
-            const main = document.getElementById('main-content');
-            const actionBar = document.getElementById('action-bar');
-
-            // ছবির স্লাইড তৈরি করা
+        function renderProduct(recommended) {
+            const main    = document.getElementById('main-content');
             const mainImg = product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`;
-            let slides = `<div class="swiper-slide"><img src="${mainImg}"></div>`;
-            
-            // যদি গ্যালারি ছবি থাকে তবে সেগুলো যোগ করা
-            if (product.gallery && product.gallery.length > 0) {
-                product.gallery.forEach(img => {
-                    const gImg = img.startsWith('http') ? img : `${BASE_URL}${img}`;
-                    slides += `<div class="swiper-slide"><img src="${gImg}"></div>`;
-                });
-            }
 
-            const isJersey = (product.category || "").toLowerCase().includes('jersey');
+            let slides = `<div class="swiper-slide"><img src="${mainImg}" loading="eager"></div>`;
+            (product.gallery || []).forEach(img => {
+                if (img) slides += `<div class="swiper-slide"><img src="${img.startsWith('http') ? img : BASE_URL + img}" loading="lazy"></div>`;
+            });
+
+            const recHTML = recommended.length > 0 ? `
+                <div class="divider"></div>
+                <div class="recommended-section">
+                    <p class="section-label">You May Also Like</p>
+                    <div class="rec-swiper-outer">
+                        <div class="swiper rec-swiper">
+                            <div class="swiper-wrapper">
+                                ${recommended.map(p => {
+                                    const pImg = p.image.startsWith('http') ? p.image : `${BASE_URL}${p.image}`;
+                                    return `
+                                        <div class="swiper-slide" style="width:162px;">
+                                            <div class="rec-card">
+                                                <a href="product-details.html?id=${p._id}" class="rec-img-link">
+                                                    <img src="${pImg}" loading="lazy">
+                                                </a>
+                                                <div class="rec-info">
+                                                    <div class="rec-name">${p.name}</div>
+                                                    <div class="rec-price">${Number(p.price).toLocaleString()} TK</div>
+                                                    <div class="rec-actions">
+                                                        <button class="rec-btn-cart" onclick="quickAdd()">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                        <button class="rec-btn-buy" onclick="window.location.href='product-details.html?id=${p._id}'">View</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>` : '';
 
             main.innerHTML = `
-                <div class="swiper mySwiper">
-                    <div class="swiper-wrapper">${slides}</div>
-                    <div class="swiper-pagination"></div>
+                <div class="product-hero">
+                    <div class="swiper mySwiper">
+                        <div class="swiper-wrapper">${slides}</div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                    <div class="hero-gradient"></div>
                 </div>
-                
-                <div class="details-card">
-                    <span class="p-badge">${product.category || 'New Arrival'}</span>
-                    <h1 class="p-name">${product.name}</h1>
-                    <p class="p-price-big">${Number(product.price).toLocaleString()} TK</p>
 
-                    ${isJersey ? `
-                        <p class="selector-label">Select Size</p>
-                        <div class="size-grid">
-                            ${['M', 'L', 'XL', 'XXL'].map(s => `
-                                <div class="size-chip ${s === 'L' ? 'active' : ''}" onclick="changeSize(this, '${s}')">${s}</div>
-                            `).join('')}
+                <div class="details-card">
+                    <span class="p-badge">${product.category || 'Limited Edition'}</span>
+
+                    <div class="p-header">
+                        <h1 class="p-name">${product.name}</h1>
+                        <div class="p-price-wrap">
+                            <div class="p-price-big">${Number(product.price).toLocaleString()}</div>
+                            <div class="p-price-label">Bangladeshi Taka</div>
                         </div>
-                    ` : ''}
+                    </div>
+
+                    <div class="divider"></div>
 
                     <div class="desc-box">
-                        <p class="selector-label">Product Details</p>
-                        <p>${product.description || 'Premium quality product from DadaXWear. Modern design with comfortable fabric.'}</p>
+                        <p class="section-label">Product Details</p>
+                        <div class="desc-content" id="desc-wrapper">
+                            <p>${product.description || 'Premium quality product.'}</p>
+                        </div>
+                        <button class="read-more-btn" id="desc-btn" onclick="toggleDescription()">
+                            View More <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
-                </div>
-            `;
-            
-            actionBar.style.display = 'flex';
 
-            // স্লাইডার চালু করা
-            new Swiper(".mySwiper", {
-                pagination: { el: ".swiper-pagination", clickable: true },
-                loop: product.gallery && product.gallery.length > 0
+                    ${recHTML}
+                </div>`;
+
+            setTimeout(checkDesc, 100);
+
+            new Swiper('.mySwiper', {
+                pagination: { el: '.swiper-pagination', clickable: true },
+                loop: (product.gallery || []).filter(Boolean).length > 0
             });
+            new Swiper('.rec-swiper', { slidesPerView: 'auto', spaceBetween: 12, freeMode: true });
         }
 
-        window.changeSize = (el, size) => {
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            selectedSize = size;
+        function checkDesc() {
+            const w = document.getElementById('desc-wrapper');
+            const b = document.getElementById('desc-btn');
+            if (w && b && w.scrollHeight > 100) b.style.display = 'flex';
+        }
+
+        window.toggleDescription = () => {
+            const w = document.getElementById('desc-wrapper');
+            const b = document.getElementById('desc-btn');
+            const exp = w.classList.toggle('expanded');
+            b.innerHTML = exp
+                ? 'View Less <i class="fas fa-chevron-up"></i>'
+                : 'View More <i class="fas fa-chevron-down"></i>';
         };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('visible');
+            setTimeout(() => t.classList.remove('visible'), 2300);
+        }
 
         window.addToBag = () => {
+            if (!product) return;
             let cart = JSON.parse(localStorage.getItem('dxw_cart') || '[]');
-            const isJersey = (product.category || "").toLowerCase().includes('jersey');
-            const sizeValue = isJersey ? selectedSize : 'Free Size';
-
             cart.push({
-                id: product._id,
-                name: product.name,
-                price: Number(product.price),
-                image: product.image,
-                size: sizeValue,
+                id:       product._id,
+                name:     product.name,
+                price:    Number(product.price),
+                image:    product.image,
+                size:     'Free Size',
                 quantity: 1
             });
-
             localStorage.setItem('dxw_cart', JSON.stringify(cart));
-            document.body.classList.add('show-toast');
-            setTimeout(() => document.body.classList.remove('show-toast'), 2000);
+            showToast('✓ Added to bag');
+
+            // icon feedback
+            const btn = document.getElementById('cart-btn');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-shopping-bag"></i>', 1600);
+            }
         };
 
-        window.orderNow = () => {
-            addToBag();
-            window.location.href = 'checkout.html';
-        };
+        window.orderNow = () => { addToBag(); window.location.href = 'checkout.html'; };
+        window.quickAdd = () => { addToBag(); };
 
-        window.addEventListener('load', initPage);
+        window.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 </html>

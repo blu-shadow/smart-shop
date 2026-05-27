@@ -69,8 +69,8 @@
                     <div class="input-box-modern">
                         <label>Delivery Area</label>
                         <select id="delivery-area" onchange="renderCheckout()">
-                            <option value="60" selected>Inside Chittagong (60 TK)</option>
-                            <option value="150">Outside Chittagong (150 TK)</option>
+                            <option value="55" selected>Inside Chittagong (55 TK)</option>
+                            <option value="115">Outside Chittagong (115 TK)</option>
                         </select>
                     </div>
 
@@ -134,7 +134,7 @@
 
                     <div id="trx-box" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255,140,0,0.05); border: 1px dashed var(--primary); border-radius: 12px;">
                         <p style="font-size: 0.8rem; color: #a0a0a0; margin-bottom: 10px;">
-                            Please Send Money to: <b style="color: var(--primary);">01815143360</b> (Personal)
+                            Please Send Money to: <b style="color: var(--primary);">01310083686</b> (Personal)
                         </p>
                         <input type="text" id="trx-id" class="trx-input" placeholder="Enter Transaction ID (TrxID)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--primary); background: transparent; color: white; text-align: center;">
                     </div>
@@ -160,141 +160,219 @@
     </div>
 
     <script>
-        const API_BASE = 'https://dadaxwear.com/api';
+        const API_BASE    = 'https://dadaxwear.com/api';
+        const SITE_URL    = 'https://dadaxwear.com';
+
+        // ✅ FIX: IP address সরিয়ে proper URL function
+        // আগে ছিল: "http://156.67.219.98:5001" + item.image
+        // সমস্যা ছিল:
+        //   ১. Raw IP ব্যবহার করা হত — port বন্ধ হলে image load হত না
+        //   ২. item.image যদি "https://dadaxwear.com/..." হয়, তাহলে URL হত:
+        //      "http://156.67.219.98:5001https://dadaxwear.com/..." — সম্পূর্ণ ভুল
+        function getImgUrl(imgPath) {
+            if (!imgPath) return 'https://via.placeholder.com/50?text=No+Img';
+            // ইতিমধ্যে full URL হলে সেটাই ব্যবহার করো
+            if (imgPath.startsWith('http')) return imgPath;
+            // Relative path হলে domain যোগ করো
+            return SITE_URL + (imgPath.startsWith('/') ? imgPath : '/' + imgPath);
+        }
 
         // ১. কার্ট রেন্ডার করা
         function renderCheckout() {
-            const cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+            let cart = [];
+            try {
+                cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+                if (!Array.isArray(cart)) cart = [];
+            } catch (e) { cart = []; }
+
             const container = document.getElementById('checkout-items-list');
             if (!container) return;
 
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color:gray; text-align:center;">Cart is empty</p>`;
+                container.innerHTML = `<p style="color:gray; text-align:center; padding: 20px 0;">Cart is empty</p>`;
                 return;
             }
 
             let subtotal = 0;
             container.innerHTML = cart.map(item => {
                 const price = Number(item.price) || 0;
-                const qty = Number(item.quantity) || 1;
-                subtotal += (price * qty);
+                const qty   = Number(item.quantity) || 1;
+                subtotal   += (price * qty);
+
+                // ✅ FIX: getImgUrl() দিয়ে সঠিক URL তৈরি
+                const imgUrl = getImgUrl(item.image);
+
                 return `
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                        <img src="http://156.67.219.98:5001${item.image}" style="width:45px; height:45px; border-radius:8px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/50'">
-                        <div style="flex:1;">
-                            <div style="color:white; font-size:0.85rem; font-weight:500;">${item.name}</div>
-                            <div style="color:#888; font-size:0.75rem;">${qty} x ${price} TK</div>
+                    <div style="display:flex; align-items:center; gap:12px; padding:12px 0;
+                                border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <img src="${imgUrl}"
+                             style="width:52px; height:52px; border-radius:10px; object-fit:cover;
+                                    background:#1c1d21; flex-shrink:0;"
+                             onerror="this.style.visibility='hidden'">
+                        <div style="flex:1; min-width:0;">
+                            <div style="color:white; font-size:0.87rem; font-weight:600;
+                                        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${item.name}
+                            </div>
+                            <div style="color:#888; font-size:0.75rem; margin-top:3px;">
+                                ${qty} × ${price.toLocaleString()} TK
+                            </div>
                         </div>
-                        <div style="color:var(--primary); font-weight:600;">${qty * price} TK</div>
+                        <div style="color:var(--primary); font-weight:700; font-size:0.95rem; flex-shrink:0;">
+                            ${(qty * price).toLocaleString()} TK
+                        </div>
                     </div>
                 `;
             }).join('');
 
-            const charge = parseInt(document.getElementById('delivery-area').value);
-            document.getElementById('summary-subtotal').innerText = subtotal;
+            const charge = parseInt(document.getElementById('delivery-area').value) || 60;
+            document.getElementById('summary-subtotal').innerText = subtotal.toLocaleString();
             document.getElementById('summary-shipping').innerText = charge;
-            document.getElementById('summary-total').innerText = subtotal + charge;
+            document.getElementById('summary-total').innerText    = (subtotal + charge).toLocaleString();
         }
 
         // ২. পেমেন্ট মেথড চেঞ্জ
         function handlePaymentChange(method) {
-            const trxBox = document.getElementById('trx-box');
-            const codLabel = document.getElementById('label-cod');
+            const trxBox     = document.getElementById('trx-box');
+            const codLabel   = document.getElementById('label-cod');
             const bkashLabel = document.getElementById('label-bkash');
 
             if (method === 'bkash') {
                 trxBox.style.display = 'block';
                 bkashLabel.classList.add('active');
-                bkashLabel.querySelector('.check-icon').style.opacity = "1";
+                bkashLabel.querySelector('.check-icon').style.opacity = '1';
                 codLabel.classList.remove('active');
-                codLabel.querySelector('.check-icon').style.opacity = "0";
+                codLabel.querySelector('.check-icon').style.opacity = '0';
             } else {
                 trxBox.style.display = 'none';
                 codLabel.classList.add('active');
-                codLabel.querySelector('.check-icon').style.opacity = "1";
+                codLabel.querySelector('.check-icon').style.opacity = '1';
                 bkashLabel.classList.remove('active');
-                bkashLabel.querySelector('.check-icon').style.opacity = "0";
+                bkashLabel.querySelector('.check-icon').style.opacity = '0';
             }
         }
 
-        // ৩. অর্ডার প্রসেস করা (মেইন ফাংশন)
+        // ৩. অর্ডার প্রসেস করা
         async function processOrder() {
-            console.log("Starting order process...");
             const btn = document.getElementById('place-order-btn');
-            const cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+
+            let cart = [];
+            try {
+                cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+                if (!Array.isArray(cart)) cart = [];
+            } catch (e) { cart = []; }
 
             if (cart.length === 0) {
-                alert("Cart is empty!");
+                alert('❌ Cart is empty!');
                 return;
             }
 
-            // ভ্যালু সংগ্রহ
-            const name = document.getElementById('cust-name').value.trim();
-            const phone = document.getElementById('cust-phone').value.trim();
+            const name    = document.getElementById('cust-name').value.trim();
+            const phone   = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
-            const size = document.getElementById('order-size').value;
-            const hand = document.getElementById('order-hand').value;
-            const areaEl = document.getElementById('delivery-area');
-            const shippingCharge = parseInt(areaEl.value);
-            const shippingArea = areaEl.options[areaEl.selectedIndex].text;
-            
-            const paymentRadio = document.querySelector('input[name="payment"]:checked');
-            const paymentMethod = paymentRadio ? paymentRadio.value : 'cod';
-            const trxId = document.getElementById('trx-id')?.value.trim() || 'N/A';
+            const size    = document.getElementById('order-size').value;
+            const hand    = document.getElementById('order-hand').value;
+            const areaEl  = document.getElementById('delivery-area');
+            const shippingCharge = parseInt(areaEl.value) || 60;
+            const shippingArea   = areaEl.options[areaEl.selectedIndex].text;
 
-            // ভ্যালিডেশন
+            const paymentRadio  = document.querySelector('input[name="payment"]:checked');
+            const paymentMethod = paymentRadio ? paymentRadio.value : 'cod';
+            const trxId         = document.getElementById('trx-id')?.value.trim() || 'N/A';
+
             if (!name || !phone || !address) {
-                alert("Please fill name, phone and address!");
+                alert('❌ Please fill name, phone and address!');
                 return;
             }
 
-            // ডাটা স্ট্রাকচার (ব্যাকএন্ড মডেলে যা যা দরকার)
+            // Phone save — history page-এর জন্য
+            localStorage.setItem('dxw_user_phone', phone);
+
+            const subtotal    = cart.reduce((s, i) => s + (Number(i.price) * Number(i.quantity || 1)), 0);
+            const totalAmount = subtotal + shippingCharge;
+
+            // API call এর আগে localStorage-এ history save
+            const tempId = 'DXW' + Date.now();
+            const historyItem = {
+                orderId:     tempId,
+                date:        new Date().toLocaleDateString('en-GB'),
+                total:       totalAmount,
+                totalAmount: totalAmount,
+                status:      'Pending',
+                items:       cart.map(item => ({
+                    name:     item.name,
+                    price:    Number(item.price),
+                    quantity: Number(item.quantity) || 1,
+                    size:     size,
+                    sleeve:   hand
+                }))
+            };
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem('dxw_order_history')) || []; } catch (e) { hist = []; }
+            hist.unshift(historyItem);
+            localStorage.setItem('dxw_order_history', JSON.stringify(hist));
+
             const orderData = {
                 customer: { name, phone, address },
                 items: cart.map(item => ({
-                    productId: item.id || item._id,
-                    name: item.name,
-                    quantity: Number(item.quantity),
-                    price: Number(item.price),
-                    size: size,
-                    handType: hand
+                    productId: String(item.id || item._id || ''),
+                    name:      item.name,
+                    quantity:  Number(item.quantity) || 1,
+                    price:     Number(item.price),
+                    size:      size,
+                    handType:  hand
                 })),
-                shippingArea: shippingArea,
+                shippingArea:   shippingArea,
                 shippingCharge: shippingCharge,
-                totalAmount: cart.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0) + shippingCharge,
-                paymentMethod: paymentMethod,
-                transactionId: trxId
+                totalAmount:    totalAmount,
+                paymentMethod:  paymentMethod,
+                transactionId:  trxId
             };
 
             try {
-                btn.disabled = true;
-                btn.innerHTML = `<span>PROCESSING...</span>`;
+                btn.disabled  = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>PROCESSING...</span>`;
 
-                const res = await fetch(`${API_BASE}/orders`, {
-                    method: 'POST',
+                const res  = await fetch(`${API_BASE}/orders`, {
+                    method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
+                    body:    JSON.stringify(orderData)
                 });
-
                 const data = await res.json();
 
                 if (res.ok) {
+                    // Real orderId update
+                    const realId = data.orderId || tempId;
+                    try {
+                        let h = JSON.parse(localStorage.getItem('dxw_order_history')) || [];
+                        if (h.length > 0 && h[0].orderId === tempId) {
+                            h[0].orderId = realId;
+                            localStorage.setItem('dxw_order_history', JSON.stringify(h));
+                        }
+                    } catch (e) {}
+
                     localStorage.removeItem('dxw_cart');
                     document.getElementById('order-success-modal').style.display = 'flex';
                 } else {
-                    alert("Order Failed: " + (data.message || "Unknown error"));
+                    // API fail — history entry সরাও
+                    try {
+                        let h = JSON.parse(localStorage.getItem('dxw_order_history')) || [];
+                        h = h.filter(o => o.orderId !== tempId);
+                        localStorage.setItem('dxw_order_history', JSON.stringify(h));
+                    } catch (e) {}
+                    alert('❌ Order Failed: ' + (data.message || 'Unknown error'));
                 }
             } catch (err) {
                 console.error(err);
-                alert("Connection Error. Is the server running?");
+                alert('❌ Connection Error. Please check your internet.');
             } finally {
-                btn.disabled = false;
+                btn.disabled  = false;
                 btn.innerHTML = `<span>CONFIRM ORDER</span> <i class="fas fa-arrow-right"></i>`;
             }
         }
 
         // পেজ লোড হলে কার্ট দেখাও
-        window.onload = renderCheckout;
+        window.addEventListener('DOMContentLoaded', renderCheckout);
     </script>
 </body>
 </html>

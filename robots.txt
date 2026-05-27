@@ -1,0 +1,23 @@
+==========================================
+​Robots.txt for DadaXWear
+​Optimized for Google and Search Engines
+​==========================================
+​User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /product-details.html
+​কনফিডেনশিয়াল এবং অপ্রয়োজনীয় পেজগুলো ব্লক করা হয়েছে
+​Disallow: /admin.html
+Disallow: /checkout.html
+Disallow: /profile.html
+Disallow: /success.html
+Disallow: /error.html
+​সার্চ ইঞ্জিনকে নির্দেশ দেওয়া হচ্ছে যেন তারা অ্যাডমিন ইমেজ বা ব্যাকআপ না পড়ে
+​Disallow: /uploads/backups/
+Disallow: /private/
+​ক্রলারের জন্য ডোমেইন পাথ নির্ধারণ (আপনার ডোমেইনটি এখানে দিন)
+​Host: dadaxwear.com
+​সাইটম্যাপ (ভবিষ্যতে সাইটম্যাপ বানালে এই লিঙ্কটি কাজে লাগবে)
+​Sitemap: https://www.google.com/search?q=https://dadaxwear.com/sitemap.xml
+​ভালো ক্রলারদের জন্য ওয়েট টাইম (বট ট্রাফিক কন্ট্রোল)
+​Crawl-delay: 10

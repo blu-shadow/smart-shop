@@ -1,126 +1,139 @@
 // ======================================================
-// DADAXWEAR CHECKOUT SYSTEM - REPAIRED v17.0
+// DADAXWEAR CHECKOUT SYSTEM - v27.0
+// FIXES v27:
+//   ✅ historyItem items এ image field যোগ করা হয়েছে
+//   ✅ orderData items এ image field যোগ করা হয়েছে
+//      → history page এ product thumbnail দেখাবে
 // ======================================================
 
-const BASE_URL = 'https://dadaxwear.com';
-const API_BASE_URL = `${BASE_URL}/api`;
-
-window.processOrder = async function() {
-    console.log("অর্ডার প্রসেস শুরু হচ্ছে...");
+window.processOrder = async function () {
     const btn = document.getElementById('place-order-btn');
-    
+
     try {
-        const cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+        let cart = [];
+        try {
+            cart = JSON.parse(localStorage.getItem('dxw_cart')) || [];
+            if (!Array.isArray(cart)) cart = [];
+        } catch (e) { cart = []; }
+
         if (cart.length === 0) {
-            alert("❌ আপনার ব্যাগ খালি! কেনাকাটা করুন।");
+            alert('❌ আপনার ব্যাগ খালি! কেনাকাটা করুন।');
             return;
         }
 
-        // ইনপুট ভ্যালু সংগ্রহ
-        const nameVal = document.getElementById('cust-name')?.value.trim();
+        const nameVal  = document.getElementById('cust-name')?.value.trim();
         const phoneVal = document.getElementById('cust-phone')?.value.trim();
-        const addrVal = document.getElementById('cust-address')?.value.trim();
-        const sizeVal = document.getElementById('order-size')?.value || "Free Size";
-        const handVal = document.getElementById('order-hand')?.value || "Default";
-        const areaEl = document.getElementById('delivery-area');
-        
-        // পেমেন্ট মেথড চেক
+        const addrVal  = document.getElementById('cust-address')?.value.trim();
+        const areaEl   = document.getElementById('delivery-area');
+
         const paymentRadio = document.querySelector('input[name="payment"]:checked');
-        const trxInput = document.getElementById('trx-id');
+        const trxInput     = document.getElementById('trx-id');
 
-        // ১. প্রাথমিক ভ্যালিডেশন
         if (!nameVal || !phoneVal || !addrVal) {
-            alert("❌ অনুগ্রহ করে নাম, ফোন এবং পূর্ণ ঠিকানা দিন।");
+            alert('❌ নাম, ফোন এবং ঠিকানা দিন।');
             return;
         }
-
         if (!paymentRadio) {
-            alert("❌ অনুগ্রহ করে একটি পেমেন্ট মেথড সিলেক্ট করুন।");
+            alert('❌ একটি পেমেন্ট মেথড সিলেক্ট করুন।');
             return;
         }
 
-        // ২. শিপিং এবং টোটাল ক্যালকুলেশন
-        const shippingCharge = areaEl ? parseInt(areaEl.value) : 60;
-        const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+        localStorage.setItem('dxw_user_phone', phoneVal.trim());
+
+        const shippingCharge = areaEl ? (parseInt(areaEl.value) || 55) : 55;
+        const subtotal    = cart.reduce((s, i) => s + (Number(i.price) * Number(i.quantity || 1)), 0);
         const totalAmount = subtotal + shippingCharge;
 
-        // ৩. ব্যাক-এন্ডের জন্য ডাটা অবজেক্ট তৈরি
-        const orderData = {
-            customer: {
-                name: nameVal,
-                phone: phoneVal,
-                address: addrVal
-            },
-            items: cart.map(item => {
-                // এখানে আইডি চেক করা হচ্ছে
-                const pId = item.id || item._id;
-                return {
-                    productId: String(pId), // আইডি স্ট্রিং হিসেবে কনভার্ট করা
-                    name: item.name,
-                    quantity: Number(item.quantity) || 1,
-                    price: Number(item.price),
-                    size: sizeVal,
-                    handType: handVal
-                };
-            }),
-            shippingArea: areaEl ? areaEl.options[areaEl.selectedIndex].text : "ঢাকার ভেতরে",
-            shippingCharge: shippingCharge,
+        // ✅ FIX: image field যোগ করা হয়েছে — history page thumbnail-এর জন্য
+        const tempId = 'DXW' + Date.now();
+        const historyItem = {
+            orderId:     tempId,
+            date:        new Date().toLocaleDateString('en-GB'),
+            total:       totalAmount,
             totalAmount: totalAmount,
-            paymentMethod: paymentRadio.value.toLowerCase(),
-            transactionId: (paymentRadio.value !== 'cod') ? (trxInput?.value.trim() || 'N/A') : 'N/A'
+            status:      'Pending',
+            items:       cart.map(item => ({
+                name:     item.name,
+                price:    Number(item.price),
+                quantity: Number(item.quantity) || 1,
+                size:     item.size || 'Free Size',
+                sleeve:   'N/A',
+                image:    item.image || ''       // ✅ image save
+            }))
         };
 
-        console.log("সার্ভারে পাঠানো ডাটা:", orderData);
+        let hist = [];
+        try { hist = JSON.parse(localStorage.getItem('dxw_order_history')) || []; } catch (e) { hist = []; }
+        hist.unshift(historyItem);
+        localStorage.setItem('dxw_order_history', JSON.stringify(hist));
 
-        // বাটন লোডিং স্টেট
-        btn.disabled = true;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...`;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...';
+        }
 
-        // ৪. সার্ভারে ডাটা পাঠানো
-        const res = await fetch(`${API_BASE_URL}/orders`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(orderData)
+        // ✅ FIX: orderData items এও image পাঠানো হচ্ছে — server DB তে save হবে
+        const orderData = {
+            customer: { name: nameVal, phone: phoneVal.trim(), address: addrVal },
+            items: cart.map(item => ({
+                productId: String(item.id || item._id || ''),
+                name:      item.name,
+                quantity:  Number(item.quantity) || 1,
+                price:     Number(item.price),
+                size:      item.size || 'Free Size',
+                handType:  'N/A',
+                image:     item.image || ''      // ✅ image server-এও save
+            })),
+            shippingCharge: shippingCharge,
+            totalAmount:    totalAmount,
+            paymentMethod:  paymentRadio.value.toLowerCase(),
+            transactionId:  paymentRadio.value !== 'cod' ? (trxInput?.value.trim() || 'N/A') : 'N/A'
+        };
+
+        const res    = await fetch('https://dadaxwear.com/api/orders', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(orderData)
         });
-
         const result = await res.json();
 
-        if (res.ok) {
-            console.log("অর্ডার সফলভাবে সেভ হয়েছে:", result);
-            localStorage.removeItem('dxw_cart'); // কার্ট পরিষ্কার
-            
-            // সাকসেস মোডাল চেক
+        if (res.ok && result.success) {
+            const realId = result.orderId || tempId;
+            try {
+                let h = JSON.parse(localStorage.getItem('dxw_order_history')) || [];
+                if (h.length > 0 && h[0].orderId === tempId) {
+                    h[0].orderId = realId;
+                    localStorage.setItem('dxw_order_history', JSON.stringify(h));
+                }
+            } catch (e) {}
+
+            localStorage.removeItem('dxw_cart');
+            if (typeof window.clearCartMemory === 'function') window.clearCartMemory();
+
             const modal = document.getElementById('order-success-modal');
             if (modal) {
                 modal.style.display = 'flex';
             } else {
-                alert("✅ আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!");
-                window.location.href = "index.html";
+                alert(`✅ অর্ডার সফল! ID: ${realId}`);
+                window.location.href = 'history.html';
             }
+
         } else {
-            console.error("সার্ভার রেসপন্স এরর:", result);
-            alert("❌ অর্ডার ব্যর্থ হয়েছে: " + (result.message || "সার্ভার এরর।"));
+            try {
+                let h = JSON.parse(localStorage.getItem('dxw_order_history')) || [];
+                h = h.filter(o => o.orderId !== tempId);
+                localStorage.setItem('dxw_order_history', JSON.stringify(h));
+            } catch (e) {}
+            alert('❌ অর্ডার ব্যর্থ: ' + (result.message || 'সার্ভার সমস্যা।'));
         }
 
     } catch (err) {
-        console.error("নেটওয়ার্ক বা জেএস এরর:", err);
-        alert("❌ একটি কারিগরি সমস্যা হয়েছে। আপনার ইন্টারনেট চেক করুন অথবা কনসোল দেখুন।");
+        console.error('Checkout error:', err);
+        alert('❌ সমস্যা হয়েছে। ইন্টারনেট চেক করুন।');
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<span>CONFIRM ORDER</span> <i class="fas fa-arrow-right"></i>`;
+            btn.innerHTML = '<span>CONFIRM ORDER</span> <i class="fas fa-arrow-right"></i>';
         }
     }
 };
-
-// টোস্ট নোটিফিকেশন ফাংশন
-function showToast(msg) {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.innerHTML = msg;
-    document.body.classList.add('show-toast');
-    setTimeout(() => document.body.classList.remove('show-toast'), 3000);
-}
